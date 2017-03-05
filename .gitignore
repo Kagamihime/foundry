@@ -9,3 +9,4 @@ Cargo.lock
 # Test files
 src/main.rs
 test.life
+result.life
