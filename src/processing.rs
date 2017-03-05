@@ -1,3 +1,7 @@
+extern crate rand;
+
+use rand::Rng;
+
 use Grid;
 
 const NEIGHBORHOOD_OFFSETS: [(i64, i64); 8] = [
@@ -13,7 +17,18 @@ const NEIGHBORHOOD_OFFSETS: [(i64, i64); 8] = [
 
 impl Grid {
     pub fn randomize(&mut self) {
-        unimplemented!()
+        let mut rng = rand::thread_rng();
+
+        let (rows, cols) = self.get_grid_size();
+        for row in 0..rows {
+            for col in 0..cols {
+                if rng.gen::<bool>() {
+                    self.set_cell_state(row, col, true);
+                } else {
+                    self.set_cell_state(row, col, false);
+                }
+            }
+        }
     }
 
     pub fn next_gen(&self) -> Grid {

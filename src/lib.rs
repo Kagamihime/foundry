@@ -4,6 +4,8 @@ mod file;
 mod networking;
 mod processing;
 
+extern crate rand;
+
 use std::iter::repeat;
 use std::fmt;
 
@@ -38,6 +40,12 @@ impl Grid {
                 Some((row, col)) => (row, col),
             },
         }
+    }
+
+    pub fn new_random(frmt: &String, trdl: bool, srvl: &Vec<u8>, brth: &Vec<u8>, rows: usize, cols: usize) -> Grid {
+        let mut new_grid = Grid::new(frmt, trdl, srvl, brth, rows, cols, None);
+        new_grid.randomize();
+        new_grid
     }
 
     pub fn get_format(&self) -> String {
@@ -116,12 +124,11 @@ impl Grid {
     }
 }
 
-// TODO: Update Debug
 impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let Grid { ref format, ref toroidal, ref survival, ref birth, ref pattern_origin, .. } = *self;
+        let Grid { ref format, ref toroidal, ref survival, ref birth, ref grid_size, ref pattern_origin, .. } = *self;
 
-        write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nPattern origin:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *pattern_origin, self)
+        write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nGrid size:\n{:?}\nPattern origin:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *grid_size, *pattern_origin, self)
     }
 }
 
