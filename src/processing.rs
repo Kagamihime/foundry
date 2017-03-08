@@ -23,9 +23,9 @@ impl Grid {
         for row in 0..rows {
             for col in 0..cols {
                 if rng.gen::<bool>() {
-                    self.set_cell_state(row, col, true);
+                    self.set_cell_state(row, col, true).unwrap(); // Shouldn't fail
                 } else {
-                    self.set_cell_state(row, col, false);
+                    self.set_cell_state(row, col, false).unwrap(); // Shouldn't fail
                 }
             }
         }
@@ -56,11 +56,11 @@ impl Grid {
                 }
                 if self.get_cell_state(row as i64, col as i64) {
                     if self.get_survival().contains(&living_cells_around) {
-                        grid.set_cell_state(row, col, true);
+                        grid.set_cell_state(row, col, true).unwrap(); // Shouldn't fail
                     } // else: remains false
                 } else {
                     if self.get_birth().contains(&living_cells_around) {
-                        grid.set_cell_state(row, col, true);
+                        grid.set_cell_state(row, col, true).unwrap(); // Shouldn't fail
                     } // else: remains false
                 }
             }
@@ -92,11 +92,11 @@ impl Grid {
                 }
                 if self.get_cell_state(row as i64, col as i64) {
                     if self.get_survival().contains(&living_cells_around) {
-                        grid.set_cell_state((row as i64 + vertical_offset) as usize, (col as i64 + horizontal_offset) as usize, true);
+                        grid.set_cell_state((row as i64 + vertical_offset) as usize, (col as i64 + horizontal_offset) as usize, true).unwrap(); // Shouldn't fail
                     } // else: remains false
                 } else {
                     if self.get_birth().contains(&living_cells_around) {
-                        grid.set_cell_state((row as i64 + vertical_offset) as usize, (col as i64 + horizontal_offset) as usize, true);
+                        grid.set_cell_state((row as i64 + vertical_offset) as usize, (col as i64 + horizontal_offset) as usize, true).unwrap(); // Shouldn't fail
                     } // else: remains false
                 }
             }

@@ -9,6 +9,8 @@ extern crate rand;
 use std::iter::repeat;
 use std::fmt;
 
+use error::GridError;
+
 // The grid of a life CA
 pub struct Grid {
     format: String,
@@ -104,12 +106,13 @@ impl Grid {
             self.cells[row as usize * self.grid_size.1 + col as usize]
         }
     }
-    pub fn set_cell_state(&mut self, row: usize, col: usize, state: bool) -> bool {
+    //CHANGED: proper error handling
+    pub fn set_cell_state(&mut self, row: usize, col: usize, state: bool) -> Result<(), GridError> {
         if row >= self.grid_size.0 || col >= self.grid_size.1 {
-            false
+            Err(GridError::OutOfBoundCoords)
         } else {
             self.cells[row * self.grid_size.1 + col] = state;
-            true
+            Ok(())
         }
     }
     pub fn get_grid_size(&self) -> (usize, usize) {

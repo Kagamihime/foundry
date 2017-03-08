@@ -1,6 +1,6 @@
 [package]
 name = "rlife"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["CYS Eisha <chenyensu0@gmail.com>"]
 description = "A life library written in Rust."
 license = "LGPLv3"
