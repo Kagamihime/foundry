@@ -8,7 +8,6 @@ use Grid;
 use error::FileParsingError;
 
 impl Grid {
-    // CHANGED: proper error handling
     pub fn load_life_file(path: &String) -> Result<Grid, FileParsingError> {
         // Open and read file
         let mut f = try!(File::open(path));
@@ -33,7 +32,6 @@ impl Grid {
         }
     }
 
-    // CHANGED: proper erro handling
     pub fn save_life_grid(&self, path: &String) -> Result<(), io::Error> {
         let mut lines: LinkedList<String> = LinkedList::new();
 
@@ -80,7 +78,6 @@ impl Grid {
     }
 }
 
-// CHANGED: proper error handling
 fn valid_life_file(lines_ref: &LinkedList<&str>) -> Result<(), FileParsingError> {
     let mut lines = lines_ref.clone(); // Make a copy of lines_ref so it can be modified
     // If "lines" is empty then the file is empty
@@ -101,7 +98,6 @@ fn valid_life_file(lines_ref: &LinkedList<&str>) -> Result<(), FileParsingError>
     }
 }
 
-// CHANGED: proper error handling
 fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingError> {
     let mut lines = lines; // Make lines mutable
 
@@ -160,7 +156,6 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingError>
     Ok(())
 }
 
-// CHANGED: proper error handling
 fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingError> {
     let mut lines = lines; // Make lines mutable
 
@@ -228,7 +223,6 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingError> 
     Ok(())
 }
 
-// CHANGED: proper error handling
 fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError> {
     let mut lines = lines; // Make lines mutable
 
@@ -291,7 +285,6 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
 }
 
 // Works like Life 1.06 except there is a #S <rows> <cols> before the cells "coords"
-// CHANGED: proper error handling
 fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError> {
     let mut lines = lines; // Make lines mutable
 

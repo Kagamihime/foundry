@@ -106,7 +106,6 @@ impl Grid {
             self.cells[row as usize * self.grid_size.1 + col as usize]
         }
     }
-    //CHANGED: proper error handling
     pub fn set_cell_state(&mut self, row: usize, col: usize, state: bool) -> Result<(), GridError> {
         if row >= self.grid_size.0 || col >= self.grid_size.1 {
             Err(GridError::OutOfBoundCoords)
