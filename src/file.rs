@@ -230,7 +230,7 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
     let frmt = lines.pop_front().unwrap();
 
     // Skip description
-    while lines.front().unwrap().starts_with("D") {
+    while lines.front().unwrap().starts_with("#D") {
         lines.pop_front().unwrap();
     }
 
@@ -292,7 +292,7 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError>
     let frmt = lines.pop_front().unwrap();
 
     // Skip description
-    while lines.front().unwrap().starts_with("D") {
+    while lines.front().unwrap().starts_with("#D") {
         lines.pop_front().unwrap();
     }
 
