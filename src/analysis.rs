@@ -1,3 +1,5 @@
+//! This module contains some methods to get informations and statistics about the patterns of a grid.
+
 use Grid;
 
 impl Grid {

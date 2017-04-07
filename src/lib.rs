@@ -1,10 +1,13 @@
-mod analysis;
-mod error;
-mod file;
-mod networking;
-mod processing;
+//! This crate provides an interface to manipulate life cellular automata grids.
+//! Those grids can be toroidal or resizable.
 
 extern crate rand;
+
+pub mod analysis;
+pub mod error;
+pub mod file;
+pub mod networking;
+pub mod processing;
 
 use std::iter::repeat;
 use std::fmt;

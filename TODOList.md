@@ -1,8 +1,6 @@
 # TODOList
 
 ## TODO
-* Write a README.md
-* Write crate's and modules' documentation
 * Write structs' and methods' documentation
 * Release version 0.1.0
 * Implement threads support for Grid
@@ -10,3 +8,5 @@
 * Do benchmarking/profiling
 
 ## DONE
+* Write a README.md
+* Write crate's and modules' documentation

@@ -1,3 +1,5 @@
+//! This module contains methods to modify a grid and compute the next generations of a grid.
+
 extern crate rand;
 
 use rand::Rng;
