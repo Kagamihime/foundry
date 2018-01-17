@@ -7,4 +7,4 @@ license = "LGPLv3"
 repository = "https://github.com/Kagamihime/rlife.git"
 
 [dependencies]
-rand = "0.3"
+rand = "0.4"
