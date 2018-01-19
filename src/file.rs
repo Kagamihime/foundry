@@ -88,12 +88,12 @@ fn valid_life_file(lines_ref: &LinkedList<&str>) -> Result<(), FileParsingErrorK
 
     if format_line == "#Resizable Life" {
         match valid_resizable_life(lines) {
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
             Ok(()) => Ok(()),
         }
     } else if format_line == "#Toroidal Life" {
         match valid_toroidal_life(lines) {
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
             Ok(()) => Ok(()),
         }
     } else {
