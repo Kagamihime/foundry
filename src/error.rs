@@ -6,23 +6,23 @@ use std::io;
 use std::num;
 
 #[derive(Debug)]
-pub enum GridError {
+pub enum GridErrorKind {
     OutOfBoundCoords,
 }
 
 
-impl fmt::Display for GridError {
+impl fmt::Display for GridErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            GridError::OutOfBoundCoords => write!(f, "Error: out of bound index"),
+            GridErrorKind::OutOfBoundCoords => write!(f, "Error: out of bound index"),
         }
     }
 }
 
-impl error::Error for GridError {
+impl error::Error for GridErrorKind {
     fn description(&self) -> &str {
         match *self {
-            GridError::OutOfBoundCoords => "out of bound index",
+            GridErrorKind::OutOfBoundCoords => "out of bound index",
         }
     }
 
@@ -32,63 +32,63 @@ impl error::Error for GridError {
 }
 
 #[derive(Debug)]
-pub enum FileParsingError {
+pub enum FileParsingErrorKind {
     UnknownFormat,
     IoError,
     // EmptyFile, TODO: add this Later
     IncompleteFile,
     RuleParsingError,
     CoordParsingError,
-    OutOfBoundCoords(GridError),
+    OutOfBoundCoords(GridErrorKind),
 }
 
-impl fmt::Display for FileParsingError {
+impl fmt::Display for FileParsingErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            FileParsingError::UnknownFormat => write!(f, "Unknown file format"),
-            FileParsingError::IoError => write!(f, "IO error"),
-            FileParsingError::IncompleteFile => write!(f, "Incomplete or empty file"), // TODO: separately handle the case where the file is empty
-            FileParsingError::RuleParsingError => write!(f, "Invalid ruleset"),
-            FileParsingError::CoordParsingError => write!(f, "Invalid coordinates"),
-            FileParsingError::OutOfBoundCoords(ref err) => write!(f, "{}", err),
+            FileParsingErrorKind::UnknownFormat => write!(f, "Unknown file format"),
+            FileParsingErrorKind::IoError => write!(f, "IO error"),
+            FileParsingErrorKind::IncompleteFile => write!(f, "Incomplete or empty file"), // TODO: separately handle the case where the file is empty
+            FileParsingErrorKind::RuleParsingError => write!(f, "Invalid ruleset"),
+            FileParsingErrorKind::CoordParsingError => write!(f, "Invalid coordinates"),
+            FileParsingErrorKind::OutOfBoundCoords(ref err) => write!(f, "{}", err),
         }
     }
 }
 
-impl error::Error for FileParsingError {
+impl error::Error for FileParsingErrorKind {
     fn description(&self) -> &str {
         match *self {
-            FileParsingError::UnknownFormat => "unknown file format",
-            FileParsingError::IoError => "IO error",
-            FileParsingError::IncompleteFile => "incomplete or empty file", // TODO: separately handle the case where the file is empty
-            FileParsingError::RuleParsingError => "invalid ruleset",
-            FileParsingError::CoordParsingError => "invalid coordinates",
-            FileParsingError::OutOfBoundCoords(ref err) => err.description(),
+            FileParsingErrorKind::UnknownFormat => "unknown file format",
+            FileParsingErrorKind::IoError => "IO error",
+            FileParsingErrorKind::IncompleteFile => "incomplete or empty file", // TODO: separately handle the case where the file is empty
+            FileParsingErrorKind::RuleParsingError => "invalid ruleset",
+            FileParsingErrorKind::CoordParsingError => "invalid coordinates",
+            FileParsingErrorKind::OutOfBoundCoords(ref err) => err.description(),
         }
     }
 
     fn cause(&self) -> Option<&error::Error> {
         match *self {
-            FileParsingError::OutOfBoundCoords(ref err) => err.cause(),
+            FileParsingErrorKind::OutOfBoundCoords(ref err) => err.cause(),
             _ => None,
         }
     }
 }
 
-impl From<io::Error> for FileParsingError {
-    fn from(_: io::Error) -> FileParsingError {
-        FileParsingError::IoError
+impl From<io::Error> for FileParsingErrorKind {
+    fn from(_: io::Error) -> FileParsingErrorKind {
+        FileParsingErrorKind::IoError
     }
 }
 
-impl From<num::ParseIntError> for FileParsingError {
-    fn from(_: num::ParseIntError) -> FileParsingError {
-        FileParsingError::CoordParsingError
+impl From<num::ParseIntError> for FileParsingErrorKind {
+    fn from(_: num::ParseIntError) -> FileParsingErrorKind {
+        FileParsingErrorKind::CoordParsingError
     }
 }
 
-impl From<GridError> for FileParsingError {
-    fn from(err: GridError) -> FileParsingError {
-        FileParsingError::OutOfBoundCoords(err)
+impl From<GridErrorKind> for FileParsingErrorKind {
+    fn from(err: GridErrorKind) -> FileParsingErrorKind {
+        FileParsingErrorKind::OutOfBoundCoords(err)
     }
 }
