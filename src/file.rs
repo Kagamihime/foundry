@@ -11,7 +11,7 @@ use error::FileParsingErrorKind;
 use Grid;
 
 impl Grid {
-    pub fn load_life_file(path: &String) -> Result<Grid, FileParsingErrorKind> {
+    pub fn load_life_file(path: &str) -> Result<Grid, FileParsingErrorKind> {
         // Open and read file
         let mut f = try!(File::open(path));
         let mut lines = String::new();
@@ -35,7 +35,7 @@ impl Grid {
         }
     }
 
-    pub fn save_life_grid(&self, path: &String) -> Result<(), io::Error> {
+    pub fn save_life_grid(&self, path: &str) -> Result<(), io::Error> {
         let mut lines: LinkedList<String> = LinkedList::new();
 
         // Put format
@@ -116,10 +116,10 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorK
             return Err(FileParsingErrorKind::RuleParsingError);
         }
         let ruleset = try!(ruleset_line.split_whitespace().filter(|s| *s != "#R").next().ok_or(FileParsingErrorKind::IncompleteFile)); // Without .next() there is a type error with split method
-        if ruleset.split("/").count() != 2 {
+        if ruleset.split('/').count() != 2 {
             return Err(FileParsingErrorKind::RuleParsingError);
         }
-        let ruleset: Vec<&str> = ruleset.split("/").collect();
+        let ruleset: Vec<&str> = ruleset.split('/').collect();
         // ruleset[0] is the survival ruleset
         for c in ruleset[0].chars() {
             match c.to_digit(10) {
@@ -174,10 +174,10 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
             return Err(FileParsingErrorKind::RuleParsingError);
         }
         let ruleset = try!(ruleset_line.split_whitespace().filter(|s| *s != "#R").next().ok_or(FileParsingErrorKind::IncompleteFile)); // Without .next() there is a type error with split method
-        if ruleset.split("/").count() != 2 {
+        if ruleset.split('/').count() != 2 {
             return Err(FileParsingErrorKind::RuleParsingError);
         }
-        let ruleset: Vec<&str> = ruleset.split("/").collect();
+        let ruleset: Vec<&str> = ruleset.split('/').collect();
         // ruleset[0] is the survival ruleset
         for c in ruleset[0].chars() {
             match c.to_digit(10) {
@@ -349,7 +349,7 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
     Ok(grid)
 }
 
-fn guess_pattern_size(coords: &Vec<(usize, usize)>) -> (usize, usize) {
+fn guess_pattern_size(coords: &[(usize, usize)]) -> (usize, usize) {
     let mut max_coords: (usize, usize) = (0, 0);
 
     for &(row, col) in coords {
