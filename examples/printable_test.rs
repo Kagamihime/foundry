@@ -5,7 +5,7 @@ use std::process;
 use rlife::Grid;
 
 fn main() {
-    let mut grid = match Grid::load_life_file(&String::from("test.life")) {
+    let mut grid = match Grid::from_file(&String::from("test.life")) {
         Err(err) => {
             println!("{}", err);
             process::exit(1);

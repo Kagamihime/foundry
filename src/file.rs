@@ -11,7 +11,7 @@ use error::FileParsingErrorKind;
 use Grid;
 
 impl Grid {
-    pub fn load_life_file(path: &str) -> Result<Grid, FileParsingErrorKind> {
+    pub fn from_file(path: &str) -> Result<Grid, FileParsingErrorKind> {
         // Open and read file
         let mut f = try!(File::open(path));
         let mut lines = String::new();
