@@ -1,14 +1,14 @@
 //! This module contains the functions and methods that enable to load and save files containing grid data.
 //! For now it supports two internal file formats : "Resizable Life" and "Toroidal Life".
 
+use std::collections::LinkedList;
+use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use std::fs::File;
 use std::iter::FromIterator;
-use std::collections::LinkedList;
 
-use Grid;
 use error::FileParsingErrorKind;
+use Grid;
 
 impl Grid {
     pub fn load_life_file(path: &String) -> Result<Grid, FileParsingErrorKind> {
