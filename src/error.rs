@@ -1,7 +1,7 @@
 //! This module contains the various kinds of errors used by this crate.
 
-use std::fmt;
 use std::error;
+use std::fmt;
 use std::io;
 use std::num;
 
