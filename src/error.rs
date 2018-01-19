@@ -1,4 +1,4 @@
-//! This module contains the various error types used by this crate.
+//! This module contains the various kinds of errors used by this crate.
 
 use std::fmt;
 use std::error;
