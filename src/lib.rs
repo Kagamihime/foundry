@@ -9,14 +9,14 @@ pub mod file;
 pub mod networking;
 pub mod processing;
 
-use std::iter::repeat;
 use std::fmt;
+use std::iter::repeat;
 
 use error::GridErrorKind;
 
 // The grid of a life CA
 pub struct Grid {
-    format: String,
+    format: String, // Contains the file format used
     toroidal: bool, // Resizable grid if set to false
 
     survival: Vec<u8>,
@@ -56,6 +56,7 @@ impl Grid {
     pub fn get_format(&self) -> String {
         self.format.clone()
     }
+
     pub fn set_format(&mut self, frmt: &String) {
         self.format = frmt.clone();
     }
@@ -67,6 +68,7 @@ impl Grid {
     pub fn get_survival(&self) -> Vec<u8> {
         self.survival.clone()
     }
+
     pub fn set_survival(&mut self, srvl: &Vec<u8>) {
         self.survival = srvl.clone();
     }
@@ -74,15 +76,21 @@ impl Grid {
     pub fn get_birth(&self) -> Vec<u8> {
         self.birth.clone()
     }
+
     pub fn set_birth(&mut self, brth: &Vec<u8>) {
         self.birth = brth.clone();
     }
 
+    pub fn get_grid_size(&self) -> (usize, usize) {
+        self.grid_size
+    }
+
     pub fn get_cell_state(&self, row: i64, col: i64) -> bool {
-        if self.cells.len() == 0 {
+        if self.cells.is_empty() {
             return false;
         }
 
+        // If the `row` and `col` parameters are out of bound of the grid
         if row < 0 || col < 0 || row as usize >= self.grid_size.0 || col as usize >= self.grid_size.1 {
             if self.toroidal {
                 let (row, col) = (
@@ -118,13 +126,11 @@ impl Grid {
             Ok(())
         }
     }
-    pub fn get_grid_size(&self) -> (usize, usize) {
-        self.grid_size
-    }
 
     pub fn get_pattern_origin(&self) -> (usize, usize) {
         (self.pattern_origin.0, self.pattern_origin.1)
     }
+
     pub fn update_pattern_origin(&mut self) {
         self.pattern_origin = self.guess_pattern_origin();
     }
