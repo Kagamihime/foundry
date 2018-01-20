@@ -14,7 +14,13 @@ use std::iter::repeat;
 
 use error::GridErrorKind;
 
-// The grid of a life CA
+/// This struct contains the grid of a life cellular automaton.
+/// This grid is stored as a `Vec<bool>`.
+/// When it is toroidal, its size is constant. When it is not,
+/// it is resized when computing the next generation
+/// according to the size of the contained pattern.
+/// The origin of the pattern is also stored in `Grid`:
+/// the coordinates of its north west corner is stored as a `(usize, usize)`.
 pub struct Grid {
     format: String, // Contains the file format used
     toroidal: bool, // Resizable grid if set to false
