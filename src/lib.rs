@@ -15,12 +15,19 @@ use std::iter::repeat;
 use error::GridErrorKind;
 
 /// This struct contains the grid of a life cellular automaton.
+///
 /// This grid is stored as a `Vec<bool>`.
 /// When it is toroidal, its size is constant. When it is not,
 /// it is resized when computing the next generation
 /// according to the size of the contained pattern.
+///
 /// The origin of the pattern is also stored in `Grid`:
-/// the coordinates of its north west corner is stored as a `(usize, usize)`.
+/// the coordinates of its north west corner is stored as a
+/// `(usize, usize)`.
+///
+/// It also contains the cellular automaton's rules stored as two `Vec<u8>`s.
+/// These are the survival and birth conditions into `survival` and `birth`
+/// respectivly.
 pub struct Grid {
     format: String, // Contains the file format used
     toroidal: bool, // Resizable grid if set to false
@@ -36,6 +43,12 @@ pub struct Grid {
 }
 
 impl Grid {
+    /// Returns a new `Grid`:
+    /// * containing the file format `frmt`
+    /// * toroidal if `trdl` is `true`, resizable otherwise
+    /// * containing the rules given by `srvl` and `brth`
+    /// * whose grid's size is the same as `rows` and `cols`
+    /// * `pttrn_rgn` can represent the relative position  of the pattern within the grid
     pub fn new(frmt: &String, trdl: bool, srvl: &Vec<u8>, brth: &Vec<u8>, rows: usize, cols: usize, pttrn_rgn: Option<(usize, usize)>) -> Grid {
         let new_cells: Vec<bool> = repeat(false).take(rows * cols).collect();
 
@@ -53,44 +66,61 @@ impl Grid {
         }
     }
 
+    /// Returns a new `Grid` and initializes its cells randomly.
     pub fn new_random(frmt: &String, trdl: bool, srvl: &Vec<u8>, brth: &Vec<u8>, rows: usize, cols: usize) -> Grid {
         let mut new_grid = Grid::new(frmt, trdl, srvl, brth, rows, cols, None);
         new_grid.randomize();
         new_grid
     }
 
+    /// Returns the file format used.
     pub fn get_format(&self) -> String {
         self.format.clone()
     }
 
+    /// Sets a new file format for this `Grid`.
     pub fn set_format(&mut self, frmt: &String) {
         self.format = frmt.clone();
     }
 
+    /// Returns `true` if the grid is toroidal. Otherwise the grid is resizable.
     pub fn is_toroidal(&self) -> bool {
         self.toroidal
     }
 
+    /// Returns the survival conditions of the cellular automaton.
     pub fn get_survival(&self) -> Vec<u8> {
         self.survival.clone()
     }
 
+    /// Redefines the survival conditions of the cellular automaton.
     pub fn set_survival(&mut self, srvl: &Vec<u8>) {
         self.survival = srvl.clone();
     }
 
+    /// Returns the birth conditions of the cellular automaton.
     pub fn get_birth(&self) -> Vec<u8> {
         self.birth.clone()
     }
 
+    /// Redefines the birth conditions of the cellular automaton.
     pub fn set_birth(&mut self, brth: &Vec<u8>) {
         self.birth = brth.clone();
     }
 
+    /// Returns the size of the grid.
     pub fn get_grid_size(&self) -> (usize, usize) {
         self.grid_size
     }
 
+    /// Returns the state of the cell at the relative coordinates
+    /// (`row`, `col`).
+    ///
+    /// If the coordinates are out of bounds and the grid is toroidal,
+    /// then it returns the state of the cell at the coordinates
+    /// modulo the size of the grid.
+    /// Otherwise, if the coordinates are out of bounds but
+    /// the grid is not toroidal, it returns `false`.
     pub fn get_cell_state(&self, row: i64, col: i64) -> bool {
         if self.cells.is_empty() {
             return false;
@@ -124,6 +154,10 @@ impl Grid {
         }
     }
 
+    /// Modifies the state of the cell at the coordinates (`row`, `col`)
+    /// with `state`.
+    /// Returns `Err(GridErrorKind::OutOfBoundCoords)` if the
+    /// coordinates are out of bounds.
     pub fn set_cell_state(&mut self, row: usize, col: usize, state: bool) -> Result<(), GridErrorKind> {
         if row >= self.grid_size.0 || col >= self.grid_size.1 {
             Err(GridErrorKind::OutOfBoundCoords)
@@ -133,6 +167,7 @@ impl Grid {
         }
     }
 
+    /// Returns the current pattern origin.
     pub fn get_pattern_origin(&self) -> (usize, usize) {
         (self.pattern_origin.0, self.pattern_origin.1)
     }
