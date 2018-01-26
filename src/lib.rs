@@ -172,6 +172,8 @@ impl Grid {
         (self.pattern_origin.0, self.pattern_origin.1)
     }
 
+    // TODO: make this method private so that it will be called
+    // by `get_pattern_origin` instead
     pub fn update_pattern_origin(&mut self) {
         self.pattern_origin = self.guess_pattern_origin();
     }
