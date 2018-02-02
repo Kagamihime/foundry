@@ -13,6 +13,12 @@ use error::FileParsingErrorKind;
 use Grid;
 
 impl Grid {
+    /// Returns a new `Grid` encoded within a file located at `path`.
+    ///
+    /// # Errors
+    ///
+    /// If there is an IO error or the file isn't a valid life file,
+    /// an error of the type `FileParsingErrorKind` will be returned.
     pub fn from_file(path: &str) -> Result<Grid, FileParsingErrorKind> {
         // Open and read file
         let mut f = try!(File::open(path));
@@ -37,6 +43,12 @@ impl Grid {
         }
     }
 
+    /// Writes the `Grid` into a file located at `path`.
+    ///
+    /// # Errors
+    ///
+    /// If there is an IO error, an error of the type `io::Error`
+    /// will be returned.
     pub fn save_life_grid(&self, path: &str) -> Result<(), io::Error> {
         let mut lines: LinkedList<String> = LinkedList::new();
 
