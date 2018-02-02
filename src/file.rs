@@ -1,5 +1,7 @@
-//! This module contains the functions and methods that enable to load and save files containing grid data.
-//! For now it supports two internal file formats : "Resizable Life" and "Toroidal Life".
+//! This module contains the functions and methods that enable to load and
+//! save files containing grid data.
+//! For now it supports two internal file formats : "Resizable Life"
+//! and "Toroidal Life".
 
 use std::collections::LinkedList;
 use std::fs::File;
