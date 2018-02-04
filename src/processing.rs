@@ -1,4 +1,5 @@
-//! This module contains some methods to modify a grid and compute its next generations.
+//! This module contains some methods to modify a grid and
+//! compute its next generations.
 
 extern crate rand;
 
