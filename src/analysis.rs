@@ -4,6 +4,8 @@
 use Grid;
 
 impl Grid {
+    /// Returns the coordinates of the cell at the upper left corner of
+    /// the current `Grid`.
     pub fn guess_pattern_origin(&self) -> (usize, usize) {
         let grid_size = self.get_grid_size();
 
@@ -29,6 +31,7 @@ impl Grid {
         pattern_origin
     }
 
+    /// Returns the size of the current `Grid`'s pattern.
     pub fn guess_pattern_size(&self) -> (usize, usize) {
         let grid_size = self.get_grid_size();
 
