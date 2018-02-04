@@ -18,6 +18,8 @@ const NEIGHBORHOOD_OFFSETS: [(i64, i64); 8] = [
 ];
 
 impl Grid {
+    /// Randomizes the current `Grid` by setting a random state to
+    /// each cell.
     pub fn randomize(&mut self) {
         let mut rng = rand::thread_rng();
 
@@ -33,6 +35,7 @@ impl Grid {
         }
     }
 
+    /// Computes the next generation of the current `Grid` and updates it.
     pub fn next_gen(&self) -> Grid {
         if self.is_toroidal() {
             self.toroidal_next_gen()
