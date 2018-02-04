@@ -1,4 +1,5 @@
-//! This crate provides an interface to manipulate life cellular automata grids.
+//! This crate provides an interface to manipulate life
+//! cellular automata grids.
 //! Those grids can be toroidal or resizable.
 
 extern crate rand;
