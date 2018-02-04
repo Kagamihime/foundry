@@ -5,6 +5,8 @@ use std::fmt;
 use std::io;
 use std::num;
 
+/// Represents the possible errors which can occur when manipulating
+/// a `Grid`.
 #[derive(Debug)]
 pub enum GridErrorKind {
     OutOfBoundCoords,
@@ -31,6 +33,8 @@ impl error::Error for GridErrorKind {
     }
 }
 
+/// Represents the possible errors which can occur when manipulating
+/// a life file.
 #[derive(Debug)]
 pub enum FileParsingErrorKind {
     UnknownFormat,
