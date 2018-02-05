@@ -39,7 +39,6 @@ pub struct Grid {
     grid_size: (usize, usize),
     cells: Vec<bool>,
     // neighborhood_state: u8, // Count of living neighbors
-
     pattern_origin: (usize, usize),
 }
 
@@ -50,7 +49,15 @@ impl Grid {
     /// * containing the rules given by `srvl` and `brth`
     /// * whose grid's size is the same as `rows` and `cols`
     /// * `pttrn_rgn` can represent the relative position  of the pattern within the grid
-    pub fn new(frmt: &String, trdl: bool, srvl: &Vec<u8>, brth: &Vec<u8>, rows: usize, cols: usize, pttrn_rgn: Option<(usize, usize)>) -> Grid {
+    pub fn new(
+        frmt: &String,
+        trdl: bool,
+        srvl: &Vec<u8>,
+        brth: &Vec<u8>,
+        rows: usize,
+        cols: usize,
+        pttrn_rgn: Option<(usize, usize)>,
+    ) -> Grid {
         let new_cells: Vec<bool> = repeat(false).take(rows * cols).collect();
 
         Grid {
@@ -68,7 +75,14 @@ impl Grid {
     }
 
     /// Returns a new `Grid` and initializes its cells randomly.
-    pub fn new_random(frmt: &String, trdl: bool, srvl: &Vec<u8>, brth: &Vec<u8>, rows: usize, cols: usize) -> Grid {
+    pub fn new_random(
+        frmt: &String,
+        trdl: bool,
+        srvl: &Vec<u8>,
+        brth: &Vec<u8>,
+        rows: usize,
+        cols: usize,
+    ) -> Grid {
         let mut new_grid = Grid::new(frmt, trdl, srvl, brth, rows, cols, None);
         new_grid.randomize();
         new_grid
@@ -128,7 +142,9 @@ impl Grid {
         }
 
         // If the `row` and `col` parameters are out of bound of the grid
-        if row < 0 || col < 0 || row as usize >= self.grid_size.0 || col as usize >= self.grid_size.1 {
+        if row < 0 || col < 0 || row as usize >= self.grid_size.0
+            || col as usize >= self.grid_size.1
+        {
             if self.toroidal {
                 let (row, col) = (
                     if row < 0 {
@@ -144,7 +160,7 @@ impl Grid {
                         col as usize % self.grid_size.1
                     } else {
                         col as usize
-                    }
+                    },
                 );
                 self.cells[row * self.grid_size.1 + col]
             } else {
@@ -159,7 +175,12 @@ impl Grid {
     /// with `state`.
     /// Returns `Err(GridErrorKind::OutOfBoundCoords)` if the
     /// coordinates are out of bounds.
-    pub fn set_cell_state(&mut self, row: usize, col: usize, state: bool) -> Result<(), GridErrorKind> {
+    pub fn set_cell_state(
+        &mut self,
+        row: usize,
+        col: usize,
+        state: bool,
+    ) -> Result<(), GridErrorKind> {
         if row >= self.grid_size.0 || col >= self.grid_size.1 {
             Err(GridErrorKind::OutOfBoundCoords)
         } else {
@@ -182,7 +203,15 @@ impl Grid {
 
 impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let Grid { ref format, ref toroidal, ref survival, ref birth, ref grid_size, ref pattern_origin, .. } = *self;
+        let Grid {
+            ref format,
+            ref toroidal,
+            ref survival,
+            ref birth,
+            ref grid_size,
+            ref pattern_origin,
+            ..
+        } = *self;
 
         write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nGrid size:\n{:?}\nPattern origin:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *grid_size, *pattern_origin, self)
     }
