@@ -26,7 +26,10 @@ impl Grid {
         try!(f.read_to_string(&mut lines));
 
         // Remove leading and trailing whitespaces and then remove blank lines
-        let lines = lines.lines().map(|line| line.trim()).filter(|line| !line.is_empty());
+        let lines = lines
+            .lines()
+            .map(|line| line.trim())
+            .filter(|line| !line.is_empty());
         // Turn the iterator into a LinkedList<&str>
         let lines: LinkedList<&str> = LinkedList::from_iter(lines);
 
@@ -36,7 +39,9 @@ impl Grid {
         // The first line should indicate the format to be used
         if *try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)) == "#Resizable Life" {
             load_resizable_life(lines)
-        } else if *try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)) == "#Toroidal Life" {
+        } else if *try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile))
+            == "#Toroidal Life"
+        {
             load_toroidal_life(lines)
         } else {
             Err(FileParsingErrorKind::UnknownFormat)
@@ -97,8 +102,12 @@ impl Grid {
 
 fn valid_life_file(lines_ref: &LinkedList<&str>) -> Result<(), FileParsingErrorKind> {
     let mut lines = lines_ref.clone(); // Make a copy of lines_ref so it can be modified
-    // If "lines" is empty then the file is empty
-    let format_line = try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+                                       // If "lines" is empty then the file is empty
+    let format_line = try!(
+        lines
+            .pop_front()
+            .ok_or(FileParsingErrorKind::IncompleteFile)
+    );
 
     if format_line == "#Resizable Life" {
         match valid_resizable_life(lines) {
@@ -120,16 +129,30 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorK
 
     // If any, check description
     while try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)).starts_with("#D") {
-        try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+        try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        );
     }
 
     //Check ruleset
     if *try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)) != "#N" {
-        let ruleset_line = try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+        let ruleset_line = try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        );
         if !ruleset_line.starts_with("#R") || ruleset_line.split_whitespace().count() != 2 {
             return Err(FileParsingErrorKind::RuleParsingError);
         }
-        let ruleset = try!(ruleset_line.split_whitespace().filter(|s| *s != "#R").next().ok_or(FileParsingErrorKind::IncompleteFile)); // Without .next() there is a type error with split method
+        let ruleset = try!(
+            ruleset_line
+                .split_whitespace()
+                .filter(|s| *s != "#R")
+                .next()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        ); // Without .next() there is a type error with split method
         if ruleset.split('/').count() != 2 {
             return Err(FileParsingErrorKind::RuleParsingError);
         }
@@ -139,7 +162,7 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorK
             match c.to_digit(10) {
                 None => return Err(FileParsingErrorKind::RuleParsingError),
                 Some(n) if n == 9 => return Err(FileParsingErrorKind::RuleParsingError),
-                Some(_) => {},
+                Some(_) => {}
             }
         }
         // ruleset[1] is the birth ruleset
@@ -147,11 +170,15 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorK
             match c.to_digit(10) {
                 None => return Err(FileParsingErrorKind::RuleParsingError),
                 Some(n) if n == 9 => return Err(FileParsingErrorKind::RuleParsingError),
-                Some(_) => {},
+                Some(_) => {}
             }
         }
     } else {
-        try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+        try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        );
     }
 
     // If no "coords" lines return an error
@@ -161,10 +188,18 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorK
 
     // Check "coords" lines
     while !lines.is_empty() {
-        if try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)).split_whitespace().count() != 2 {
+        if try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile))
+            .split_whitespace()
+            .count() != 2
+        {
             return Err(FileParsingErrorKind::CoordParsingError);
         }
-        let coords: Vec<&str> = try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile)).split_whitespace().collect();
+        let coords: Vec<&str> = try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        ).split_whitespace()
+            .collect();
         try!(coords[0].parse::<usize>());
         try!(coords[1].parse::<usize>());
     }
@@ -178,16 +213,30 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
 
     // If any, check description
     while try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)).starts_with("#D") {
-        try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+        try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        );
     }
 
     // Check ruleset
     if *try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)) != "#N" {
-        let ruleset_line = try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+        let ruleset_line = try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        );
         if !ruleset_line.starts_with("#R") || ruleset_line.split_whitespace().count() != 2 {
             return Err(FileParsingErrorKind::RuleParsingError);
         }
-        let ruleset = try!(ruleset_line.split_whitespace().filter(|s| *s != "#R").next().ok_or(FileParsingErrorKind::IncompleteFile)); // Without .next() there is a type error with split method
+        let ruleset = try!(
+            ruleset_line
+                .split_whitespace()
+                .filter(|s| *s != "#R")
+                .next()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        ); // Without .next() there is a type error with split method
         if ruleset.split('/').count() != 2 {
             return Err(FileParsingErrorKind::RuleParsingError);
         }
@@ -197,7 +246,7 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
             match c.to_digit(10) {
                 None => return Err(FileParsingErrorKind::RuleParsingError),
                 Some(n) if n == 9 => return Err(FileParsingErrorKind::RuleParsingError),
-                Some(_) => {},
+                Some(_) => {}
             }
         }
         // ruleset[1] is the birth ruleset
@@ -205,19 +254,30 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
             match c.to_digit(10) {
                 None => return Err(FileParsingErrorKind::RuleParsingError),
                 Some(n) if n == 9 => return Err(FileParsingErrorKind::RuleParsingError),
-                Some(_) => {},
+                Some(_) => {}
             }
         }
     } else {
-        try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+        try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        );
     }
 
     // Check grid size specification (#S <rows> <cols>)
-    let grid_size_line = try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile));
+    let grid_size_line = try!(
+        lines
+            .pop_front()
+            .ok_or(FileParsingErrorKind::IncompleteFile)
+    );
     if !grid_size_line.starts_with("#S") || grid_size_line.split_whitespace().count() != 3 {
         return Err(FileParsingErrorKind::CoordParsingError);
     }
-    let grid_size: Vec<&str> = grid_size_line.split_whitespace().filter(|s| *s != "#S").collect();
+    let grid_size: Vec<&str> = grid_size_line
+        .split_whitespace()
+        .filter(|s| *s != "#S")
+        .collect();
     try!(grid_size[0].parse::<usize>());
     try!(grid_size[1].parse::<usize>());
 
@@ -228,10 +288,18 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
 
     // Check "coords" lines
     while !lines.is_empty() {
-        if try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile)).split_whitespace().count() != 2 {
+        if try!(lines.front().ok_or(FileParsingErrorKind::IncompleteFile))
+            .split_whitespace()
+            .count() != 2
+        {
             return Err(FileParsingErrorKind::CoordParsingError);
         }
-        let coords: Vec<&str> = try!(lines.pop_front().ok_or(FileParsingErrorKind::IncompleteFile)).split_whitespace().collect();
+        let coords: Vec<&str> = try!(
+            lines
+                .pop_front()
+                .ok_or(FileParsingErrorKind::IncompleteFile)
+        ).split_whitespace()
+            .collect();
         try!(coords[0].parse::<usize>());
         try!(coords[1].parse::<usize>());
     }
@@ -260,7 +328,11 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
         brth = vec![3];
     } else {
         let ruleset_line = lines.pop_front().unwrap();
-        let ruleset = ruleset_line.split_whitespace().filter(|s| *s != "#R").next().unwrap(); // Without .next().unwrap() there is a type error with split method
+        let ruleset = ruleset_line
+            .split_whitespace()
+            .filter(|s| *s != "#R")
+            .next()
+            .unwrap(); // Without .next().unwrap() there is a type error with split method
         let ruleset: Vec<&str> = ruleset.split("/").collect();
         let survival_ruleset = ruleset[0].chars();
         let birth_ruleset = ruleset[1].chars();
@@ -281,7 +353,10 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
     let mut file_coords: Vec<(usize, usize)> = Vec::new();
     while !lines.is_empty() {
         let coords_str: Vec<&str> = lines.pop_front().unwrap().split_whitespace().collect();
-        let coords: (usize, usize) = (coords_str[0].parse().unwrap(), coords_str[1].parse().unwrap());
+        let coords: (usize, usize) = (
+            coords_str[0].parse().unwrap(),
+            coords_str[1].parse().unwrap(),
+        );
         file_coords.push(coords);
     }
     let pattern_size = guess_pattern_size(&file_coords);
@@ -289,7 +364,15 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
     let grid_size = (pattern_size.0 + 2, pattern_size.1 + 2); // "+ 2" so that there is a border with the width of one cell around the pattern
 
     // Make CA grid
-    let mut grid = Grid::new(&frmt.to_string(), false, &srvl, &brth, grid_size.0, grid_size.1, Some((1, 1)));
+    let mut grid = Grid::new(
+        &frmt.to_string(),
+        false,
+        &srvl,
+        &brth,
+        grid_size.0,
+        grid_size.1,
+        Some((1, 1)),
+    );
 
     // Set to true the cells that are alive (takes into account the position of the pattern)
     let pattern_origin = grid.get_pattern_origin();
@@ -322,7 +405,11 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
         brth = vec![3];
     } else {
         let ruleset_line = lines.pop_front().unwrap();
-        let ruleset = ruleset_line.split_whitespace().filter(|s| *s != "#R").next().unwrap(); // Without .next().unwrap() there is a type error with split method
+        let ruleset = ruleset_line
+            .split_whitespace()
+            .filter(|s| *s != "#R")
+            .next()
+            .unwrap(); // Without .next().unwrap() there is a type error with split method
         let ruleset: Vec<&str> = ruleset.split("/").collect();
         let survival_ruleset = ruleset[0].chars();
         let birth_ruleset = ruleset[1].chars();
@@ -340,17 +427,36 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
     brth.dedup();
 
     // Get the grid size
-    let grid_size_line_terms: Vec<&str> = lines.pop_front().unwrap().split_whitespace().filter(|s| *s != "#S").collect();
-    let grid_size: (usize, usize) = (grid_size_line_terms[0].parse().unwrap(), grid_size_line_terms[1].parse().unwrap());
+    let grid_size_line_terms: Vec<&str> = lines
+        .pop_front()
+        .unwrap()
+        .split_whitespace()
+        .filter(|s| *s != "#S")
+        .collect();
+    let grid_size: (usize, usize) = (
+        grid_size_line_terms[0].parse().unwrap(),
+        grid_size_line_terms[1].parse().unwrap(),
+    );
 
     // Make CA grid
-    let mut grid = Grid::new(&frmt.to_string(), true, &srvl, &brth, grid_size.0, grid_size.1, None);
+    let mut grid = Grid::new(
+        &frmt.to_string(),
+        true,
+        &srvl,
+        &brth,
+        grid_size.0,
+        grid_size.1,
+        None,
+    );
 
     // Get the coordinates from the file
     let mut file_coords: Vec<(usize, usize)> = Vec::new();
     while !lines.is_empty() {
         let coords_str: Vec<&str> = lines.pop_front().unwrap().split_whitespace().collect();
-        let coords: (usize, usize) = (coords_str[0].parse().unwrap(), coords_str[1].parse().unwrap());
+        let coords: (usize, usize) = (
+            coords_str[0].parse().unwrap(),
+            coords_str[1].parse().unwrap(),
+        );
         file_coords.push(coords);
     }
 
