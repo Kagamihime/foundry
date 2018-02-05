@@ -1,8 +1,6 @@
 # TODOList
 
 ## TODO
-* Write structs' and methods' documentation
-* Run rustfmt on the project
 * Write unit tests
 * Write integration tests
 * Release version 0.1.0
@@ -16,3 +14,5 @@
 ## DONE
 * Write a README.md
 * Write crate's and modules' documentation
+* Write structs' and methods' documentation
+* Run rustfmt on the project
