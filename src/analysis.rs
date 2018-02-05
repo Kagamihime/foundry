@@ -55,6 +55,9 @@ impl Grid {
             }
         }
 
-        (pattern_limit.0 - pattern_origin.0 + 1, pattern_limit.1 - pattern_origin.1 + 1)
+        (
+            pattern_limit.0 - pattern_origin.0 + 1,
+            pattern_limit.1 - pattern_origin.1 + 1,
+        )
     }
 }
