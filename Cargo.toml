@@ -1,10 +1,10 @@
 [package]
 name = "rlife"
 version = "0.0.7"
-authors = ["CYS Eisha <chenyensu0@gmail.com>"]
+authors = ["Eisha Chen-yen-su <chenyensu0@gmail.com>"]
 description = "A life library written in Rust."
 license = "LGPLv3"
 repository = "https://github.com/Kagamihime/rlife.git"
 
 [dependencies]
-rand = "0.4"
+rand = "0.5"
