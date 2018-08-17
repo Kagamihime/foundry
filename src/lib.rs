@@ -7,7 +7,6 @@ extern crate rand;
 pub mod analysis;
 pub mod error;
 pub mod file;
-pub mod networking;
 pub mod processing;
 
 use std::fmt;
