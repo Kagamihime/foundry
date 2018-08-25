@@ -278,6 +278,41 @@ mod tests {
     }
 
     #[test]
+    fn test_toroidal_setters() {
+        let mut control_grid = Grid {
+            format: String::from("#Toroidal Life"),
+            toroidal: true,
+            survival: vec![2, 3],
+            birth: vec![3],
+            grid_size: (3, 3),
+            cells: vec![false, false, false, true, true, true, false, false, false],
+            pattern_origin: (1, 0),
+        };
+
+        control_grid.set_format(&String::from("#Resizable Life"));
+        control_grid.set_survival(&vec![1, 7]);
+        control_grid.set_birth(&vec![5]);
+        control_grid.set_cell_state(0, 0, true).unwrap();
+        control_grid.set_cell_state(1, 1, false).unwrap();
+
+        // Check new meta-data.
+        assert_eq!("#Resizable Life", control_grid.get_format());
+        assert_eq!(vec![1, 7], control_grid.get_survival());
+        assert_eq!(vec![5], control_grid.get_birth());
+
+        // Check new cells.
+        assert_eq!(true, control_grid.get_cell_state(0, 0));
+        assert_eq!(false, control_grid.get_cell_state(0, 1));
+        assert_eq!(false, control_grid.get_cell_state(0, 2));
+        assert_eq!(true, control_grid.get_cell_state(1, 0));
+        assert_eq!(false, control_grid.get_cell_state(1, 1));
+        assert_eq!(true, control_grid.get_cell_state(1, 2));
+        assert_eq!(false, control_grid.get_cell_state(2, 0));
+        assert_eq!(false, control_grid.get_cell_state(2, 1));
+        assert_eq!(false, control_grid.get_cell_state(2, 2));
+    }
+
+    #[test]
     fn test_resizable_getters() {
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
@@ -313,5 +348,40 @@ mod tests {
         assert_eq!(false, control_grid.get_cell_state(3, 3));
         assert_eq!(false, control_grid.get_cell_state(1, -1));
         assert_eq!(false, control_grid.get_cell_state(1, 3));
+    }
+
+    #[test]
+    fn test_resizable_setters() {
+        let mut control_grid = Grid {
+            format: String::from("#Resizable Life"),
+            toroidal: false,
+            survival: vec![2, 3],
+            birth: vec![3],
+            grid_size: (3, 3),
+            cells: vec![false, false, false, true, true, true, false, false, false],
+            pattern_origin: (1, 0),
+        };
+
+        control_grid.set_format(&String::from("#Toroidal Life"));
+        control_grid.set_survival(&vec![1, 7]);
+        control_grid.set_birth(&vec![5]);
+        control_grid.set_cell_state(0, 0, true).unwrap();
+        control_grid.set_cell_state(1, 1, false).unwrap();
+
+        // Check new meta-data.
+        assert_eq!("#Toroidal Life", control_grid.get_format());
+        assert_eq!(vec![1, 7], control_grid.get_survival());
+        assert_eq!(vec![5], control_grid.get_birth());
+
+        // Check new cells.
+        assert_eq!(true, control_grid.get_cell_state(0, 0));
+        assert_eq!(false, control_grid.get_cell_state(0, 1));
+        assert_eq!(false, control_grid.get_cell_state(0, 2));
+        assert_eq!(true, control_grid.get_cell_state(1, 0));
+        assert_eq!(false, control_grid.get_cell_state(1, 1));
+        assert_eq!(true, control_grid.get_cell_state(1, 2));
+        assert_eq!(false, control_grid.get_cell_state(2, 0));
+        assert_eq!(false, control_grid.get_cell_state(2, 1));
+        assert_eq!(false, control_grid.get_cell_state(2, 2));
     }
 }
