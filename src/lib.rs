@@ -234,3 +234,84 @@ impl fmt::Display for Grid {
         write!(f, "")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use Grid;
+
+    #[test]
+    fn test_toroidal_getters() {
+        let control_grid = Grid {
+            format: String::from("#Toroidal Life"),
+            toroidal: true,
+            survival: vec![2, 3],
+            birth: vec![3],
+            grid_size: (3, 3),
+            cells: vec![false, false, false, true, true, true, false, false, false],
+            pattern_origin: (1, 0),
+        };
+
+        // Test meta-data getters.
+        assert_eq!("#Toroidal Life", control_grid.get_format());
+        assert_eq!(true, control_grid.is_toroidal());
+        assert_eq!(vec![2, 3], control_grid.get_survival());
+        assert_eq!(vec![3], control_grid.get_birth());
+        assert_eq!((3, 3), control_grid.get_grid_size());
+        assert_eq!((1, 0), control_grid.get_pattern_origin());
+
+        // Test cells getter.
+        assert_eq!(false, control_grid.get_cell_state(0, 0));
+        assert_eq!(false, control_grid.get_cell_state(0, 1));
+        assert_eq!(false, control_grid.get_cell_state(0, 2));
+        assert_eq!(true, control_grid.get_cell_state(1, 0));
+        assert_eq!(true, control_grid.get_cell_state(1, 1));
+        assert_eq!(true, control_grid.get_cell_state(1, 2));
+        assert_eq!(false, control_grid.get_cell_state(2, 0));
+        assert_eq!(false, control_grid.get_cell_state(2, 1));
+        assert_eq!(false, control_grid.get_cell_state(2, 2));
+
+        // Test cells getter for out of bound values.
+        assert_eq!(false, control_grid.get_cell_state(-1, -1));
+        assert_eq!(false, control_grid.get_cell_state(3, 3));
+        assert_eq!(true, control_grid.get_cell_state(1, -1));
+        assert_eq!(true, control_grid.get_cell_state(1, 3));
+    }
+
+    #[test]
+    fn test_resizable_getters() {
+        let control_grid = Grid {
+            format: String::from("#Resizable Life"),
+            toroidal: false,
+            survival: vec![2, 3],
+            birth: vec![3],
+            grid_size: (3, 3),
+            cells: vec![false, false, false, true, true, true, false, false, false],
+            pattern_origin: (1, 0),
+        };
+
+        // Test meta-data getters.
+        assert_eq!("#Resizable Life", control_grid.get_format());
+        assert_eq!(false, control_grid.is_toroidal());
+        assert_eq!(vec![2, 3], control_grid.get_survival());
+        assert_eq!(vec![3], control_grid.get_birth());
+        assert_eq!((3, 3), control_grid.get_grid_size());
+        assert_eq!((1, 0), control_grid.get_pattern_origin());
+
+        // Test cells getter.
+        assert_eq!(false, control_grid.get_cell_state(0, 0));
+        assert_eq!(false, control_grid.get_cell_state(0, 1));
+        assert_eq!(false, control_grid.get_cell_state(0, 2));
+        assert_eq!(true, control_grid.get_cell_state(1, 0));
+        assert_eq!(true, control_grid.get_cell_state(1, 1));
+        assert_eq!(true, control_grid.get_cell_state(1, 2));
+        assert_eq!(false, control_grid.get_cell_state(2, 0));
+        assert_eq!(false, control_grid.get_cell_state(2, 1));
+        assert_eq!(false, control_grid.get_cell_state(2, 2));
+
+        // Test cells getter for out of bound values.
+        assert_eq!(false, control_grid.get_cell_state(-1, -1));
+        assert_eq!(false, control_grid.get_cell_state(3, 3));
+        assert_eq!(false, control_grid.get_cell_state(1, -1));
+        assert_eq!(false, control_grid.get_cell_state(1, 3));
+    }
+}
