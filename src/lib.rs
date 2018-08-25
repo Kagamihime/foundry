@@ -223,12 +223,12 @@ impl fmt::Display for Grid {
         for row in 0..grid_size.0 {
             for col in 0..grid_size.1 {
                 if self.get_cell_state(row as i64, col as i64) {
-                    try!(write!(f, "*"));
+                    write!(f, "*")?;
                 } else {
-                    try!(write!(f, "."));
+                    write!(f, ".")?;
                 }
             }
-            try!(write!(f, "\n"));
+            write!(f, "\n")?;
         }
 
         write!(f, "")
