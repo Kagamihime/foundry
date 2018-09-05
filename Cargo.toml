@@ -8,3 +8,5 @@ repository = "https://github.com/Kagamihime/rlife.git"
 
 [dependencies]
 rand = "0.5"
+vulkano = "0.10"
+vulkano-shader-derive = "0.10"
