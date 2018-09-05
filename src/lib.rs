@@ -42,7 +42,7 @@ pub struct Grid {
     toroidal: Arc<CpuAccessibleBuffer<i32>>, // Resizable grid if set to false (note: false = 0 and true = 1)
 
     survival: Arc<CpuAccessibleBuffer<[u8]>>,
-    birth: Vec<u8>,
+    birth: Arc<CpuAccessibleBuffer<[u8]>>,
 
     grid_size: (usize, usize),
     cells: Arc<CpuAccessibleBuffer<[u8]>>,
@@ -87,11 +87,17 @@ impl Grid {
             srvl.iter().map(|&n| n),
         ).expect("failed to create buffer");
 
+        let birth = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            brth.iter().map(|&n| n),
+        ).expect("failed to create buffer");
+
         Grid {
             format: frmt.clone(),
             toroidal,
             survival,
-            birth: brth.clone(),
+            birth,
             grid_size: (rows, cols),
             cells: new_cells,
             pattern_origin: match pttrn_rgn {
@@ -153,12 +159,16 @@ impl Grid {
 
     /// Returns the birth conditions of the cellular automaton.
     pub fn get_birth(&self) -> Vec<u8> {
-        self.birth.clone()
+        self.birth.read().unwrap().to_vec()
     }
 
     /// Redefines the birth conditions of the cellular automaton.
     pub fn set_birth(&mut self, brth: &Vec<u8>) {
-        self.birth = brth.clone();
+        self.birth = CpuAccessibleBuffer::from_iter(
+            self.device.clone(),
+            BufferUsage::all(),
+            brth.iter().map(|&n| n),
+        ).expect("failed to create buffer");
     }
 
     /// Returns the size of the grid.
@@ -308,11 +318,18 @@ mod tests {
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let brth_content: Vec<u8> = vec![3];
+        let birth = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            brth_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Toroidal Life"),
             toroidal,
             survival,
-            birth: vec![3],
+            birth,
             grid_size: (3, 3),
             cells,
             pattern_origin: (1, 0),
@@ -367,11 +384,18 @@ mod tests {
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let brth_content: Vec<u8> = vec![3];
+        let birth = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            brth_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let mut control_grid = Grid {
             format: String::from("#Toroidal Life"),
             toroidal,
             survival,
-            birth: vec![3],
+            birth,
             grid_size: (3, 3),
             cells,
             pattern_origin: (1, 0),
@@ -423,11 +447,18 @@ mod tests {
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let brth_content: Vec<u8> = vec![3];
+        let birth = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            brth_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
             toroidal,
             survival,
-            birth: vec![3],
+            birth,
             grid_size: (3, 3),
             cells,
             pattern_origin: (1, 0),
@@ -482,11 +513,18 @@ mod tests {
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let brth_content: Vec<u8> = vec![3];
+        let birth = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            brth_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let mut control_grid = Grid {
             format: String::from("#Resizable Life"),
             toroidal,
             survival,
-            birth: vec![3],
+            birth,
             grid_size: (3, 3),
             cells,
             pattern_origin: (1, 0),
