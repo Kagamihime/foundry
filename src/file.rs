@@ -68,7 +68,7 @@ impl Grid {
         for n in self.survival.read().unwrap().iter() {
             survival_ruleset.push_str(&n.to_string());
         }
-        for n in &self.birth {
+        for n in self.birth.read().unwrap().iter() {
             birth_ruleset.push_str(&n.to_string());
         }
         lines.push_back(format!("#R {}/{}", survival_ruleset, birth_ruleset));
