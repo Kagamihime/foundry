@@ -41,7 +41,7 @@ pub struct Grid {
     format: String, // Contains the file format used
     toroidal: Arc<CpuAccessibleBuffer<i32>>, // Resizable grid if set to false (note: false = 0 and true = 1)
 
-    survival: Vec<u8>,
+    survival: Arc<CpuAccessibleBuffer<[u8]>>,
     birth: Vec<u8>,
 
     grid_size: (usize, usize),
@@ -81,10 +81,16 @@ impl Grid {
             CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), toroidal_val)
                 .expect("failed to create buffer");
 
+        let survival = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            srvl.iter().map(|&n| n),
+        ).expect("failed to create buffer");
+
         Grid {
             format: frmt.clone(),
-            survival: srvl.clone(),
             toroidal,
+            survival,
             birth: brth.clone(),
             grid_size: (rows, cols),
             cells: new_cells,
@@ -133,12 +139,16 @@ impl Grid {
 
     /// Returns the survival conditions of the cellular automaton.
     pub fn get_survival(&self) -> Vec<u8> {
-        self.survival.clone()
+        self.survival.read().unwrap().to_vec()
     }
 
     /// Redefines the survival conditions of the cellular automaton.
     pub fn set_survival(&mut self, srvl: &Vec<u8>) {
-        self.survival = srvl.clone();
+        self.survival = CpuAccessibleBuffer::from_iter(
+            self.device.clone(),
+            BufferUsage::all(),
+            srvl.iter().map(|&n| n),
+        ).expect("failed to create buffer");
     }
 
     /// Returns the birth conditions of the cellular automaton.
@@ -291,10 +301,17 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
             .expect("failed to create buffer");
 
+        let srvl_content: Vec<u8> = vec![2, 3];
+        let survival = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            srvl_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Toroidal Life"),
-            survival: vec![2, 3],
             toroidal,
+            survival,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
@@ -343,10 +360,17 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
             .expect("failed to create buffer");
 
+        let srvl_content: Vec<u8> = vec![2, 3];
+        let survival = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            srvl_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let mut control_grid = Grid {
             format: String::from("#Toroidal Life"),
-            survival: vec![2, 3],
             toroidal,
+            survival,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
@@ -392,10 +416,17 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
             .expect("failed to create buffer");
 
+        let srvl_content: Vec<u8> = vec![2, 3];
+        let survival = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            srvl_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
-            survival: vec![2, 3],
             toroidal,
+            survival,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
@@ -444,10 +475,17 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
             .expect("failed to create buffer");
 
+        let srvl_content: Vec<u8> = vec![2, 3];
+        let survival = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            srvl_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let mut control_grid = Grid {
             format: String::from("#Resizable Life"),
-            survival: vec![2, 3],
             toroidal,
+            survival,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
