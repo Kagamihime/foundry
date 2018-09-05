@@ -65,7 +65,7 @@ impl Grid {
         // Put ruleset
         let mut survival_ruleset = String::new();
         let mut birth_ruleset = String::new();
-        for n in &self.survival {
+        for n in self.survival.read().unwrap().iter() {
             survival_ruleset.push_str(&n.to_string());
         }
         for n in &self.birth {
