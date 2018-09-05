@@ -28,9 +28,9 @@ impl Grid {
         for row in 0..rows {
             for col in 0..cols {
                 if rng.gen::<bool>() {
-                    self.set_cell_state(row, col, true).unwrap(); // Shouldn't fail
+                    self.set_cell_state(row, col, 255).unwrap(); // Shouldn't fail
                 } else {
-                    self.set_cell_state(row, col, false).unwrap(); // Shouldn't fail
+                    self.set_cell_state(row, col, 0).unwrap(); // Shouldn't fail
                 }
             }
         }
@@ -64,17 +64,17 @@ impl Grid {
             for col in 0..cols {
                 let mut living_cells_around: u8 = 0;
                 for offset in NEIGHBORHOOD_OFFSETS.iter() {
-                    if self.get_cell_state(row as i64 + offset.0, col as i64 + offset.1) {
+                    if self.get_cell_state(row as i64 + offset.0, col as i64 + offset.1) == 255 {
                         living_cells_around += 1;
                     }
                 }
-                if self.get_cell_state(row as i64, col as i64) {
+                if self.get_cell_state(row as i64, col as i64) == 255 {
                     if self.get_survival().contains(&living_cells_around) {
-                        grid.set_cell_state(row, col, true).unwrap(); // Shouldn't fail
+                        grid.set_cell_state(row, col, 255).unwrap(); // Shouldn't fail
                     } // else: remains false
                 } else {
                     if self.get_birth().contains(&living_cells_around) {
-                        grid.set_cell_state(row, col, true).unwrap(); // Shouldn't fail
+                        grid.set_cell_state(row, col, 255).unwrap(); // Shouldn't fail
                     } // else: remains false
                 }
             }
@@ -109,16 +109,16 @@ impl Grid {
             for col in 0..old_grid_size.1 {
                 let mut living_cells_around: u8 = 0;
                 for offset in NEIGHBORHOOD_OFFSETS.iter() {
-                    if self.get_cell_state(row as i64 + offset.0, col as i64 + offset.1) {
+                    if self.get_cell_state(row as i64 + offset.0, col as i64 + offset.1) == 255 {
                         living_cells_around += 1;
                     }
                 }
-                if self.get_cell_state(row as i64, col as i64) {
+                if self.get_cell_state(row as i64, col as i64) == 255 {
                     if self.get_survival().contains(&living_cells_around) {
                         grid.set_cell_state(
                             (row as i64 + vertical_offset) as usize,
                             (col as i64 + horizontal_offset) as usize,
-                            true,
+                            255,
                         ).unwrap(); // Shouldn't fail
                     } // else: remains false
                 } else {
@@ -126,7 +126,7 @@ impl Grid {
                         grid.set_cell_state(
                             (row as i64 + vertical_offset) as usize,
                             (col as i64 + horizontal_offset) as usize,
-                            true,
+                            255,
                         ).unwrap(); // Shouldn't fail
                     } // else: remains false
                 }

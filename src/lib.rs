@@ -14,9 +14,10 @@ pub mod processing;
 mod vulkan;
 
 use std::fmt;
-use std::iter::repeat;
 use std::sync::Arc;
 
+use vulkano::buffer::BufferUsage;
+use vulkano::buffer::CpuAccessibleBuffer;
 use vulkano::device::Device;
 use vulkano::device::Queue;
 
@@ -44,7 +45,7 @@ pub struct Grid {
     birth: Vec<u8>,
 
     grid_size: (usize, usize),
-    cells: Vec<bool>,
+    cells: Arc<CpuAccessibleBuffer<[u8]>>,
     // neighborhood_state: u8, // Count of living neighbors
     pattern_origin: (usize, usize),
 
@@ -68,8 +69,12 @@ impl Grid {
         cols: usize,
         pttrn_rgn: Option<(usize, usize)>,
     ) -> Grid {
-        let new_cells: Vec<bool> = repeat(false).take(rows * cols).collect();
         let (device, queue) = vulkan::vk_init();
+
+        let new_cells_iter = (0..rows * cols).map(|_| 0u8);
+        let new_cells =
+            CpuAccessibleBuffer::from_iter(device.clone(), BufferUsage::all(), new_cells_iter)
+                .expect("failed to create buffer");
 
         Grid {
             format: frmt.clone(),
@@ -149,9 +154,11 @@ impl Grid {
     /// modulo the size of the grid.
     /// Otherwise, if the coordinates are out of bounds but
     /// the grid is not toroidal, it returns `false`.
-    pub fn get_cell_state(&self, row: i64, col: i64) -> bool {
-        if self.cells.is_empty() {
-            return false;
+    pub fn get_cell_state(&self, row: i64, col: i64) -> u8 {
+        let cells = self.cells.write().unwrap();
+
+        if cells.is_empty() {
+            return 0;
         }
 
         // If the `row` and `col` parameters are out of bound of the grid
@@ -175,12 +182,12 @@ impl Grid {
                         col as usize
                     },
                 );
-                self.cells[row * self.grid_size.1 + col]
+                cells[row * self.grid_size.1 + col]
             } else {
-                false
+                0
             }
         } else {
-            self.cells[row as usize * self.grid_size.1 + col as usize]
+            cells[row as usize * self.grid_size.1 + col as usize]
         }
     }
 
@@ -192,12 +199,14 @@ impl Grid {
         &mut self,
         row: usize,
         col: usize,
-        state: bool,
+        state: u8,
     ) -> Result<(), GridErrorKind> {
+        let mut cells = self.cells.write().unwrap();
+
         if row >= self.grid_size.0 || col >= self.grid_size.1 {
             Err(GridErrorKind::OutOfBoundCoords)
         } else {
-            self.cells[row * self.grid_size.1 + col] = state;
+            cells[row * self.grid_size.1 + col] = state;
             Ok(())
         }
     }
@@ -236,7 +245,7 @@ impl fmt::Display for Grid {
 
         for row in 0..grid_size.0 {
             for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) {
+                if self.get_cell_state(row as i64, col as i64) == 255 {
                     write!(f, "*")?;
                 } else {
                     write!(f, ".")?;
@@ -251,6 +260,9 @@ impl fmt::Display for Grid {
 
 #[cfg(test)]
 mod tests {
+    use super::vulkano::buffer::BufferUsage;
+    use super::vulkano::buffer::CpuAccessibleBuffer;
+
     use super::vulkan;
 
     use Grid;
@@ -259,13 +271,20 @@ mod tests {
     fn test_toroidal_getters() {
         let (device, queue) = vulkan::vk_init();
 
+        let cells_content: Vec<u8> = vec![0, 0, 0, 255, 255, 255, 0, 0, 0];
+        let cells = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            cells_content.into_iter(),
+        ).expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Toroidal Life"),
             toroidal: true,
             survival: vec![2, 3],
             birth: vec![3],
             grid_size: (3, 3),
-            cells: vec![false, false, false, true, true, true, false, false, false],
+            cells,
             pattern_origin: (1, 0),
             device,
             queue,
@@ -280,26 +299,33 @@ mod tests {
         assert_eq!((1, 0), control_grid.get_pattern_origin());
 
         // Test cells getter.
-        assert_eq!(false, control_grid.get_cell_state(0, 0));
-        assert_eq!(false, control_grid.get_cell_state(0, 1));
-        assert_eq!(false, control_grid.get_cell_state(0, 2));
-        assert_eq!(true, control_grid.get_cell_state(1, 0));
-        assert_eq!(true, control_grid.get_cell_state(1, 1));
-        assert_eq!(true, control_grid.get_cell_state(1, 2));
-        assert_eq!(false, control_grid.get_cell_state(2, 0));
-        assert_eq!(false, control_grid.get_cell_state(2, 1));
-        assert_eq!(false, control_grid.get_cell_state(2, 2));
+        assert_eq!(0, control_grid.get_cell_state(0, 0));
+        assert_eq!(0, control_grid.get_cell_state(0, 1));
+        assert_eq!(0, control_grid.get_cell_state(0, 2));
+        assert_eq!(255, control_grid.get_cell_state(1, 0));
+        assert_eq!(255, control_grid.get_cell_state(1, 1));
+        assert_eq!(255, control_grid.get_cell_state(1, 2));
+        assert_eq!(0, control_grid.get_cell_state(2, 0));
+        assert_eq!(0, control_grid.get_cell_state(2, 1));
+        assert_eq!(0, control_grid.get_cell_state(2, 2));
 
         // Test cells getter for out of bound values.
-        assert_eq!(false, control_grid.get_cell_state(-1, -1));
-        assert_eq!(false, control_grid.get_cell_state(3, 3));
-        assert_eq!(true, control_grid.get_cell_state(1, -1));
-        assert_eq!(true, control_grid.get_cell_state(1, 3));
+        assert_eq!(0, control_grid.get_cell_state(-1, -1));
+        assert_eq!(0, control_grid.get_cell_state(3, 3));
+        assert_eq!(255, control_grid.get_cell_state(1, -1));
+        assert_eq!(255, control_grid.get_cell_state(1, 3));
     }
 
     #[test]
     fn test_toroidal_setters() {
         let (device, queue) = vulkan::vk_init();
+
+        let cells_content: Vec<u8> = vec![0, 0, 0, 255, 255, 255, 0, 0, 0];
+        let cells = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            cells_content.into_iter(),
+        ).expect("failed to create buffer");
 
         let mut control_grid = Grid {
             format: String::from("#Toroidal Life"),
@@ -307,7 +333,7 @@ mod tests {
             survival: vec![2, 3],
             birth: vec![3],
             grid_size: (3, 3),
-            cells: vec![false, false, false, true, true, true, false, false, false],
+            cells,
             pattern_origin: (1, 0),
             device,
             queue,
@@ -316,8 +342,8 @@ mod tests {
         control_grid.set_format(&String::from("#Resizable Life"));
         control_grid.set_survival(&vec![1, 7]);
         control_grid.set_birth(&vec![5]);
-        control_grid.set_cell_state(0, 0, true).unwrap();
-        control_grid.set_cell_state(1, 1, false).unwrap();
+        control_grid.set_cell_state(0, 0, 255).unwrap();
+        control_grid.set_cell_state(1, 1, 0).unwrap();
 
         // Check new meta-data.
         assert_eq!("#Resizable Life", control_grid.get_format());
@@ -325,20 +351,27 @@ mod tests {
         assert_eq!(vec![5], control_grid.get_birth());
 
         // Check new cells.
-        assert_eq!(true, control_grid.get_cell_state(0, 0));
-        assert_eq!(false, control_grid.get_cell_state(0, 1));
-        assert_eq!(false, control_grid.get_cell_state(0, 2));
-        assert_eq!(true, control_grid.get_cell_state(1, 0));
-        assert_eq!(false, control_grid.get_cell_state(1, 1));
-        assert_eq!(true, control_grid.get_cell_state(1, 2));
-        assert_eq!(false, control_grid.get_cell_state(2, 0));
-        assert_eq!(false, control_grid.get_cell_state(2, 1));
-        assert_eq!(false, control_grid.get_cell_state(2, 2));
+        assert_eq!(255, control_grid.get_cell_state(0, 0));
+        assert_eq!(0, control_grid.get_cell_state(0, 1));
+        assert_eq!(0, control_grid.get_cell_state(0, 2));
+        assert_eq!(255, control_grid.get_cell_state(1, 0));
+        assert_eq!(0, control_grid.get_cell_state(1, 1));
+        assert_eq!(255, control_grid.get_cell_state(1, 2));
+        assert_eq!(0, control_grid.get_cell_state(2, 0));
+        assert_eq!(0, control_grid.get_cell_state(2, 1));
+        assert_eq!(0, control_grid.get_cell_state(2, 2));
     }
 
     #[test]
     fn test_resizable_getters() {
         let (device, queue) = vulkan::vk_init();
+
+        let cells_content: Vec<u8> = vec![0, 0, 0, 255, 255, 255, 0, 0, 0];
+        let cells = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            cells_content.into_iter(),
+        ).expect("failed to create buffer");
 
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
@@ -346,7 +379,7 @@ mod tests {
             survival: vec![2, 3],
             birth: vec![3],
             grid_size: (3, 3),
-            cells: vec![false, false, false, true, true, true, false, false, false],
+            cells,
             pattern_origin: (1, 0),
             device,
             queue,
@@ -361,26 +394,33 @@ mod tests {
         assert_eq!((1, 0), control_grid.get_pattern_origin());
 
         // Test cells getter.
-        assert_eq!(false, control_grid.get_cell_state(0, 0));
-        assert_eq!(false, control_grid.get_cell_state(0, 1));
-        assert_eq!(false, control_grid.get_cell_state(0, 2));
-        assert_eq!(true, control_grid.get_cell_state(1, 0));
-        assert_eq!(true, control_grid.get_cell_state(1, 1));
-        assert_eq!(true, control_grid.get_cell_state(1, 2));
-        assert_eq!(false, control_grid.get_cell_state(2, 0));
-        assert_eq!(false, control_grid.get_cell_state(2, 1));
-        assert_eq!(false, control_grid.get_cell_state(2, 2));
+        assert_eq!(0, control_grid.get_cell_state(0, 0));
+        assert_eq!(0, control_grid.get_cell_state(0, 1));
+        assert_eq!(0, control_grid.get_cell_state(0, 2));
+        assert_eq!(255, control_grid.get_cell_state(1, 0));
+        assert_eq!(255, control_grid.get_cell_state(1, 1));
+        assert_eq!(255, control_grid.get_cell_state(1, 2));
+        assert_eq!(0, control_grid.get_cell_state(2, 0));
+        assert_eq!(0, control_grid.get_cell_state(2, 1));
+        assert_eq!(0, control_grid.get_cell_state(2, 2));
 
         // Test cells getter for out of bound values.
-        assert_eq!(false, control_grid.get_cell_state(-1, -1));
-        assert_eq!(false, control_grid.get_cell_state(3, 3));
-        assert_eq!(false, control_grid.get_cell_state(1, -1));
-        assert_eq!(false, control_grid.get_cell_state(1, 3));
+        assert_eq!(0, control_grid.get_cell_state(-1, -1));
+        assert_eq!(0, control_grid.get_cell_state(3, 3));
+        assert_eq!(0, control_grid.get_cell_state(1, -1));
+        assert_eq!(0, control_grid.get_cell_state(1, 3));
     }
 
     #[test]
     fn test_resizable_setters() {
         let (device, queue) = vulkan::vk_init();
+
+        let cells_content: Vec<u8> = vec![0, 0, 0, 255, 255, 255, 0, 0, 0];
+        let cells = CpuAccessibleBuffer::from_iter(
+            device.clone(),
+            BufferUsage::all(),
+            cells_content.into_iter(),
+        ).expect("failed to create buffer");
 
         let mut control_grid = Grid {
             format: String::from("#Resizable Life"),
@@ -388,7 +428,7 @@ mod tests {
             survival: vec![2, 3],
             birth: vec![3],
             grid_size: (3, 3),
-            cells: vec![false, false, false, true, true, true, false, false, false],
+            cells,
             pattern_origin: (1, 0),
             device,
             queue,
@@ -397,8 +437,8 @@ mod tests {
         control_grid.set_format(&String::from("#Toroidal Life"));
         control_grid.set_survival(&vec![1, 7]);
         control_grid.set_birth(&vec![5]);
-        control_grid.set_cell_state(0, 0, true).unwrap();
-        control_grid.set_cell_state(1, 1, false).unwrap();
+        control_grid.set_cell_state(0, 0, 255).unwrap();
+        control_grid.set_cell_state(1, 1, 0).unwrap();
 
         // Check new meta-data.
         assert_eq!("#Toroidal Life", control_grid.get_format());
@@ -406,14 +446,14 @@ mod tests {
         assert_eq!(vec![5], control_grid.get_birth());
 
         // Check new cells.
-        assert_eq!(true, control_grid.get_cell_state(0, 0));
-        assert_eq!(false, control_grid.get_cell_state(0, 1));
-        assert_eq!(false, control_grid.get_cell_state(0, 2));
-        assert_eq!(true, control_grid.get_cell_state(1, 0));
-        assert_eq!(false, control_grid.get_cell_state(1, 1));
-        assert_eq!(true, control_grid.get_cell_state(1, 2));
-        assert_eq!(false, control_grid.get_cell_state(2, 0));
-        assert_eq!(false, control_grid.get_cell_state(2, 1));
-        assert_eq!(false, control_grid.get_cell_state(2, 2));
+        assert_eq!(255, control_grid.get_cell_state(0, 0));
+        assert_eq!(0, control_grid.get_cell_state(0, 1));
+        assert_eq!(0, control_grid.get_cell_state(0, 2));
+        assert_eq!(255, control_grid.get_cell_state(1, 0));
+        assert_eq!(0, control_grid.get_cell_state(1, 1));
+        assert_eq!(255, control_grid.get_cell_state(1, 2));
+        assert_eq!(0, control_grid.get_cell_state(2, 0));
+        assert_eq!(0, control_grid.get_cell_state(2, 1));
+        assert_eq!(0, control_grid.get_cell_state(2, 2));
     }
 }

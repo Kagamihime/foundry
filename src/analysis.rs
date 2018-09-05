@@ -17,7 +17,7 @@ impl Grid {
 
         for row in 0..grid_size.0 {
             for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) {
+                if self.get_cell_state(row as i64, col as i64) == 255 {
                     if row < pattern_origin.0 {
                         pattern_origin.0 = row;
                     }
@@ -44,7 +44,7 @@ impl Grid {
 
         for row in 0..grid_size.0 {
             for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) {
+                if self.get_cell_state(row as i64, col as i64) == 255 {
                     if row > pattern_limit.0 {
                         pattern_limit.0 = row;
                     }
