@@ -39,7 +39,7 @@ use error::GridErrorKind;
 /// respectivly.
 pub struct Grid {
     format: String, // Contains the file format used
-    toroidal: bool, // Resizable grid if set to false
+    toroidal: Arc<CpuAccessibleBuffer<i32>>, // Resizable grid if set to false (note: false = 0 and true = 1)
 
     survival: Vec<u8>,
     birth: Vec<u8>,
@@ -76,10 +76,15 @@ impl Grid {
             CpuAccessibleBuffer::from_iter(device.clone(), BufferUsage::all(), new_cells_iter)
                 .expect("failed to create buffer");
 
+        let toroidal_val = if trdl { 1 } else { 0 };
+        let toroidal =
+            CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), toroidal_val)
+                .expect("failed to create buffer");
+
         Grid {
             format: frmt.clone(),
-            toroidal: trdl,
             survival: srvl.clone(),
+            toroidal,
             birth: brth.clone(),
             grid_size: (rows, cols),
             cells: new_cells,
@@ -118,7 +123,12 @@ impl Grid {
 
     /// Returns `true` if the grid is toroidal. Otherwise the grid is resizable.
     pub fn is_toroidal(&self) -> bool {
-        self.toroidal
+        let toroidal = self.toroidal.read().unwrap();
+
+        match *toroidal {
+            0 => false,
+            _ => true,
+        }
     }
 
     /// Returns the survival conditions of the cellular automaton.
@@ -165,7 +175,7 @@ impl Grid {
         if row < 0 || col < 0 || row as usize >= self.grid_size.0
             || col as usize >= self.grid_size.1
         {
-            if self.toroidal {
+            if self.is_toroidal() {
                 let (row, col) = (
                     if row < 0 {
                         (self.grid_size.0 as i64 + row) as usize
@@ -278,10 +288,13 @@ mod tests {
             cells_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
+            .expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Toroidal Life"),
-            toroidal: true,
             survival: vec![2, 3],
+            toroidal,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
@@ -327,10 +340,13 @@ mod tests {
             cells_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
+            .expect("failed to create buffer");
+
         let mut control_grid = Grid {
             format: String::from("#Toroidal Life"),
-            toroidal: true,
             survival: vec![2, 3],
+            toroidal,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
@@ -373,10 +389,13 @@ mod tests {
             cells_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
+            .expect("failed to create buffer");
+
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
-            toroidal: false,
             survival: vec![2, 3],
+            toroidal,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
@@ -422,10 +441,13 @@ mod tests {
             cells_content.into_iter(),
         ).expect("failed to create buffer");
 
+        let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
+            .expect("failed to create buffer");
+
         let mut control_grid = Grid {
             format: String::from("#Resizable Life"),
-            toroidal: false,
             survival: vec![2, 3],
+            toroidal,
             birth: vec![3],
             grid_size: (3, 3),
             cells,
