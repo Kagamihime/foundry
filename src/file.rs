@@ -82,7 +82,7 @@ impl Grid {
         // Put living cells coords
         for row in 0..grid_size.0 {
             for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) {
+                if self.get_cell_state(row as i64, col as i64) == 255 {
                     lines.push_back(format!("{} {}", row, col));
                 }
             }
@@ -365,7 +365,7 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
     // Set to true the cells that are alive (takes into account the position of the pattern)
     let pattern_origin = grid.get_pattern_origin();
     for (row, col) in file_coords {
-        grid.set_cell_state(pattern_origin.0 + row, pattern_origin.1 + col, true)?;
+        grid.set_cell_state(pattern_origin.0 + row, pattern_origin.1 + col, 255)?;
     }
 
     // Return CA grid
@@ -450,7 +450,7 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
 
     // Set to true the cells that are alive
     for (row, col) in file_coords {
-        grid.set_cell_state(row, col, true)?;
+        grid.set_cell_state(row, col, 255)?;
     }
 
     // Return CA grid
