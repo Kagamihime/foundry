@@ -3,11 +3,15 @@
 //! Those grids can be toroidal or resizable.
 
 extern crate rand;
+#[macro_use]
+extern crate vulkano_shader_derive;
+extern crate vulkano;
 
 pub mod analysis;
 pub mod error;
 pub mod file;
 pub mod processing;
+mod vulkan;
 
 use std::fmt;
 use std::iter::repeat;
