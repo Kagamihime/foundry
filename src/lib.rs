@@ -15,6 +15,10 @@ mod vulkan;
 
 use std::fmt;
 use std::iter::repeat;
+use std::sync::Arc;
+
+use vulkano::device::Device;
+use vulkano::device::Queue;
 
 use error::GridErrorKind;
 
@@ -43,6 +47,9 @@ pub struct Grid {
     cells: Vec<bool>,
     // neighborhood_state: u8, // Count of living neighbors
     pattern_origin: (usize, usize),
+
+    device: Arc<Device>,
+    queue: Arc<Queue>,
 }
 
 impl Grid {
@@ -62,6 +69,7 @@ impl Grid {
         pttrn_rgn: Option<(usize, usize)>,
     ) -> Grid {
         let new_cells: Vec<bool> = repeat(false).take(rows * cols).collect();
+        let (device, queue) = vulkan::vk_init();
 
         Grid {
             format: frmt.clone(),
@@ -74,6 +82,8 @@ impl Grid {
                 None => (0, 0),
                 Some((row, col)) => (row, col),
             },
+            device,
+            queue,
         }
     }
 
@@ -241,10 +251,14 @@ impl fmt::Display for Grid {
 
 #[cfg(test)]
 mod tests {
+    use super::vulkan;
+
     use Grid;
 
     #[test]
     fn test_toroidal_getters() {
+        let (device, queue) = vulkan::vk_init();
+
         let control_grid = Grid {
             format: String::from("#Toroidal Life"),
             toroidal: true,
@@ -253,6 +267,8 @@ mod tests {
             grid_size: (3, 3),
             cells: vec![false, false, false, true, true, true, false, false, false],
             pattern_origin: (1, 0),
+            device,
+            queue,
         };
 
         // Test meta-data getters.
@@ -283,6 +299,8 @@ mod tests {
 
     #[test]
     fn test_toroidal_setters() {
+        let (device, queue) = vulkan::vk_init();
+
         let mut control_grid = Grid {
             format: String::from("#Toroidal Life"),
             toroidal: true,
@@ -291,6 +309,8 @@ mod tests {
             grid_size: (3, 3),
             cells: vec![false, false, false, true, true, true, false, false, false],
             pattern_origin: (1, 0),
+            device,
+            queue,
         };
 
         control_grid.set_format(&String::from("#Resizable Life"));
@@ -318,6 +338,8 @@ mod tests {
 
     #[test]
     fn test_resizable_getters() {
+        let (device, queue) = vulkan::vk_init();
+
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
             toroidal: false,
@@ -326,6 +348,8 @@ mod tests {
             grid_size: (3, 3),
             cells: vec![false, false, false, true, true, true, false, false, false],
             pattern_origin: (1, 0),
+            device,
+            queue,
         };
 
         // Test meta-data getters.
@@ -356,6 +380,8 @@ mod tests {
 
     #[test]
     fn test_resizable_setters() {
+        let (device, queue) = vulkan::vk_init();
+
         let mut control_grid = Grid {
             format: String::from("#Resizable Life"),
             toroidal: false,
@@ -364,6 +390,8 @@ mod tests {
             grid_size: (3, 3),
             cells: vec![false, false, false, true, true, true, false, false, false],
             pattern_origin: (1, 0),
+            device,
+            queue,
         };
 
         control_grid.set_format(&String::from("#Toroidal Life"));
