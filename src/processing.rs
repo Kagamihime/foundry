@@ -3,8 +3,21 @@
 
 extern crate rand;
 
+use std::sync::Arc;
+
 use rand::Rng;
 
+use super::vulkano::buffer::BufferUsage;
+use super::vulkano::buffer::CpuAccessibleBuffer;
+use super::vulkano::command_buffer::AutoCommandBufferBuilder;
+use super::vulkano::command_buffer::CommandBuffer;
+use super::vulkano::descriptor::descriptor_set::PersistentDescriptorSet;
+use super::vulkano::format::ClearValue;
+use super::vulkano::format::Format;
+use super::vulkano::image::Dimensions;
+use super::vulkano::image::StorageImage;
+use super::vulkano::pipeline::ComputePipeline;
+use super::vulkano::sync::GpuFuture;
 use Grid;
 
 const NEIGHBORHOOD_OFFSETS: [(i64, i64); 8] = [
@@ -135,5 +148,103 @@ impl Grid {
 
         grid.update_pattern_origin();
         grid
+    }
+
+    fn recenter_pattern(&mut self) {
+        let (min_x, max_x, min_y, max_y) = self.compute_pattern_boundaries();
+
+        if min_x.is_none() || max_x.is_none() || min_y.is_none() || max_y.is_none() {
+            return;
+        }
+
+        let (min_x, max_x, min_y, max_y) = (
+            min_x.unwrap(),
+            max_x.unwrap(),
+            min_y.unwrap(),
+            max_y.unwrap(),
+        );
+
+        let pattern_origin = (min_x as i32, min_y as i32);
+        let pattern_size = ((max_x - min_x + 1), (max_y - min_y + 1));
+
+        let cells_img = StorageImage::new(
+            self.device.clone(),
+            Dimensions::Dim2d {
+                width: self.grid_size.1 as u32,
+                height: self.grid_size.0 as u32,
+            },
+            Format::R8Unorm,
+            Some(self.queue.family()),
+        ).expect("failed to create image");
+
+        let centered_img = StorageImage::new(
+            self.device.clone(),
+            Dimensions::Dim2d {
+                width: pattern_size.0 as u32 + 2,
+                height: pattern_size.1 as u32 + 2,
+            },
+            Format::R8Unorm,
+            Some(self.queue.family()),
+        ).expect("failed to create image");
+
+        let centered_buff = unsafe {
+            CpuAccessibleBuffer::uninitialized_array(
+                self.device.clone(),
+                (pattern_size.0 + 2) * (pattern_size.1 + 2),
+                BufferUsage::all(),
+            ).expect("failed to create buffer")
+        };
+
+        let command_buffer =
+            AutoCommandBufferBuilder::new(self.device.clone(), self.queue.family())
+                .unwrap()
+                .clear_color_image(
+                    centered_img.clone(),
+                    ClearValue::Float([0.0, 0.0, 0.0, 0.0]),
+                )
+                .unwrap()
+                .build()
+                .unwrap();
+
+        let finished = command_buffer.execute(self.queue.clone()).unwrap();
+        finished
+            .then_signal_fence_and_flush()
+            .unwrap()
+            .wait(None)
+            .unwrap();
+
+        let command_buffer =
+            AutoCommandBufferBuilder::new(self.device.clone(), self.queue.family())
+                .unwrap()
+                .copy_buffer_to_image(self.cells.clone(), cells_img.clone())
+                .unwrap()
+                .copy_image(
+                    cells_img.clone(),
+                    [pattern_origin.0, pattern_origin.1, 0],
+                    0,
+                    0,
+                    centered_img.clone(),
+                    [1, 1, 0],
+                    0,
+                    0,
+                    [pattern_size.0 as u32, pattern_size.1 as u32, 1],
+                    1,
+                )
+                .unwrap()
+                .copy_image_to_buffer(centered_img.clone(), centered_buff.clone())
+                .unwrap()
+                .build()
+                .unwrap();
+
+        let finished = command_buffer.execute(self.queue.clone()).unwrap();
+        finished
+            .then_signal_fence_and_flush()
+            .unwrap()
+            .wait(None)
+            .unwrap();
+
+        self.grid_size = (pattern_size.1 + 2, pattern_size.0 + 2);
+        self.cells = centered_buff;
+        self.pattern_origin = (1, 1);
     }
 }
