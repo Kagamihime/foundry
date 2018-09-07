@@ -38,3 +38,33 @@ pub fn vk_init() -> (Arc<Device>, Arc<Queue>) {
 
     (device, queue)
 }
+
+pub mod fms {
+    #[derive(VulkanoShader)]
+    #[ty = "compute"]
+    #[src = "
+    #version 450
+
+    layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+    layout(set = 0, binding = 0, r8) uniform readonly image2D img;
+
+    layout(set = 0, binding = 1) buffer FlatMapX {
+        int data[];
+    } fmx;
+
+    layout(set = 0, binding = 2) buffer FlatMapY {
+        int data[];
+    } fmy;
+
+    void main() {
+        ivec2 access_coord = ivec2(gl_GlobalInvocationID.xy);
+
+        if (imageLoad(img, access_coord).x == 1.0) {
+            fmx.data[access_coord.x] = 1;
+            fmy.data[access_coord.y] = 1;
+        }
+    }
+    "]
+    struct Dummy;
+}
