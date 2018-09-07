@@ -46,7 +46,6 @@ pub struct Grid {
 
     grid_size: (usize, usize),
     cells: Arc<CpuAccessibleBuffer<[u8]>>,
-    // neighborhood_state: u8, // Count of living neighbors
 
     device: Arc<Device>,
     queue: Arc<Queue>,
