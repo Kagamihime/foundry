@@ -359,13 +359,11 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
         &brth,
         grid_size.0,
         grid_size.1,
-        Some((1, 1)),
     );
 
-    // Set to true the cells that are alive (takes into account the position of the pattern)
-    let pattern_origin = grid.get_pattern_origin();
+    // Set to true the cells that are alive
     for (row, col) in file_coords {
-        grid.set_cell_state(pattern_origin.0 + row, pattern_origin.1 + col, 255)?;
+        grid.set_cell_state(row, col, 255)?;
     }
 
     // Return CA grid
@@ -434,7 +432,6 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
         &brth,
         grid_size.0,
         grid_size.1,
-        None,
     );
 
     // Get the coordinates from the file
