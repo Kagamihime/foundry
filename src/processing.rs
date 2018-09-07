@@ -324,6 +324,5 @@ impl Grid {
 
         self.grid_size = (pattern_size.1 + 2, pattern_size.0 + 2);
         self.cells = centered_buff;
-        self.pattern_origin = (1, 1);
     }
 }

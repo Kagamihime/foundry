@@ -47,7 +47,6 @@ pub struct Grid {
     grid_size: (usize, usize),
     cells: Arc<CpuAccessibleBuffer<[u8]>>,
     // neighborhood_state: u8, // Count of living neighbors
-    pattern_origin: (usize, usize),
 
     device: Arc<Device>,
     queue: Arc<Queue>,
@@ -67,7 +66,6 @@ impl Grid {
         brth: &Vec<u32>,
         rows: usize,
         cols: usize,
-        pttrn_rgn: Option<(usize, usize)>,
     ) -> Grid {
         let (device, queue) = vulkan::vk_init();
 
@@ -100,10 +98,6 @@ impl Grid {
             birth,
             grid_size: (rows, cols),
             cells: new_cells,
-            pattern_origin: match pttrn_rgn {
-                None => (0, 0),
-                Some((row, col)) => (row, col),
-            },
             device,
             queue,
         }
@@ -118,7 +112,7 @@ impl Grid {
         rows: usize,
         cols: usize,
     ) -> Grid {
-        let mut new_grid = Grid::new(frmt, trdl, srvl, brth, rows, cols, None);
+        let mut new_grid = Grid::new(frmt, trdl, srvl, brth, rows, cols);
         new_grid.randomize();
         new_grid
     }
@@ -240,17 +234,6 @@ impl Grid {
             Ok(())
         }
     }
-
-    /// Returns the current pattern origin.
-    pub fn get_pattern_origin(&self) -> (usize, usize) {
-        (self.pattern_origin.0, self.pattern_origin.1)
-    }
-
-    // TODO: make this method private so that it will be called
-    // by `get_pattern_origin` instead
-    pub fn update_pattern_origin(&mut self) {
-        self.pattern_origin = self.guess_pattern_origin();
-    }
 }
 
 impl fmt::Debug for Grid {
@@ -261,11 +244,10 @@ impl fmt::Debug for Grid {
             ref survival,
             ref birth,
             ref grid_size,
-            ref pattern_origin,
             ..
         } = *self;
 
-        write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nGrid size:\n{:?}\nPattern origin:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *grid_size, *pattern_origin, self)
+        write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nGrid size:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *grid_size, self)
     }
 }
 
@@ -332,7 +314,6 @@ mod tests {
             birth,
             grid_size: (3, 3),
             cells,
-            pattern_origin: (1, 0),
             device,
             queue,
         };
@@ -343,7 +324,6 @@ mod tests {
         assert_eq!(vec![2, 3], control_grid.get_survival());
         assert_eq!(vec![3], control_grid.get_birth());
         assert_eq!((3, 3), control_grid.get_grid_size());
-        assert_eq!((1, 0), control_grid.get_pattern_origin());
 
         // Test cells getter.
         assert_eq!(0, control_grid.get_cell_state(0, 0));
@@ -398,7 +378,6 @@ mod tests {
             birth,
             grid_size: (3, 3),
             cells,
-            pattern_origin: (1, 0),
             device,
             queue,
         };
@@ -461,7 +440,6 @@ mod tests {
             birth,
             grid_size: (3, 3),
             cells,
-            pattern_origin: (1, 0),
             device,
             queue,
         };
@@ -472,7 +450,6 @@ mod tests {
         assert_eq!(vec![2, 3], control_grid.get_survival());
         assert_eq!(vec![3], control_grid.get_birth());
         assert_eq!((3, 3), control_grid.get_grid_size());
-        assert_eq!((1, 0), control_grid.get_pattern_origin());
 
         // Test cells getter.
         assert_eq!(0, control_grid.get_cell_state(0, 0));
@@ -527,7 +504,6 @@ mod tests {
             birth,
             grid_size: (3, 3),
             cells,
-            pattern_origin: (1, 0),
             device,
             queue,
         };
