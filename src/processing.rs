@@ -18,6 +18,8 @@ use super::vulkano::image::Dimensions;
 use super::vulkano::image::StorageImage;
 use super::vulkano::pipeline::ComputePipeline;
 use super::vulkano::sync::GpuFuture;
+
+use super::vulkan::ngs;
 use Grid;
 
 const NEIGHBORHOOD_OFFSETS: [(i64, i64); 8] = [
@@ -148,6 +150,83 @@ impl Grid {
 
         grid.update_pattern_origin();
         grid
+    }
+
+    pub fn vk_next_gen(&mut self) {
+        if !self.is_toroidal() {
+            self.recenter_pattern();
+        }
+
+        let cells_in_img = StorageImage::new(
+            self.device.clone(),
+            Dimensions::Dim2d {
+                width: self.grid_size.1 as u32,
+                height: self.grid_size.0 as u32,
+            },
+            Format::R8Unorm,
+            Some(self.queue.family()),
+        ).expect("failed to create image");
+
+        let cells_out_img = StorageImage::new(
+            self.device.clone(),
+            Dimensions::Dim2d {
+                width: self.grid_size.1 as u32,
+                height: self.grid_size.0 as u32,
+            },
+            Format::R8Unorm,
+            Some(self.queue.family()),
+        ).expect("failed to create image");
+
+        let shader =
+            ngs::Shader::load(self.device.clone()).expect("failed to create shader module");
+        let compute_pipeline = Arc::new(
+            ComputePipeline::new(self.device.clone(), &shader.main_entry_point(), &())
+                .expect("failed to create compute pipeline"),
+        );
+
+        let set = Arc::new(
+            PersistentDescriptorSet::start(compute_pipeline.clone(), 0)
+                .add_image(cells_in_img.clone())
+                .unwrap()
+                .add_image(cells_out_img.clone())
+                .unwrap()
+                .add_buffer(self.toroidal.clone())
+                .unwrap()
+                .add_buffer(self.survival.clone())
+                .unwrap()
+                .add_buffer(self.birth.clone())
+                .unwrap()
+                .build()
+                .unwrap(),
+        );
+
+        let command_buffer =
+            AutoCommandBufferBuilder::new(self.device.clone(), self.queue.family())
+                .unwrap()
+                .copy_buffer_to_image(self.cells.clone(), cells_in_img.clone())
+                .unwrap()
+                .dispatch(
+                    [
+                        (self.grid_size.1 as f64 / 8.0).ceil() as u32,
+                        (self.grid_size.0 as f64 / 8.0).ceil() as u32,
+                        1,
+                    ],
+                    compute_pipeline.clone(),
+                    set.clone(),
+                    (),
+                )
+                .unwrap()
+                .copy_image_to_buffer(cells_out_img.clone(), self.cells.clone())
+                .unwrap()
+                .build()
+                .unwrap();
+
+        let finished = command_buffer.execute(self.queue.clone()).unwrap();
+        finished
+            .then_signal_fence_and_flush()
+            .unwrap()
+            .wait(None)
+            .unwrap();
     }
 
     fn recenter_pattern(&mut self) {
