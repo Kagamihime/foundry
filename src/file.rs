@@ -308,8 +308,8 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
     }
 
     // Get ruleset
-    let mut srvl: Vec<u8> = Vec::new();
-    let mut brth: Vec<u8> = Vec::new();
+    let mut srvl: Vec<u32> = Vec::new();
+    let mut brth: Vec<u32> = Vec::new();
     if *lines.front().unwrap() == "#N" {
         lines.pop_front().unwrap();
         srvl = vec![2, 3];
@@ -325,10 +325,10 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
         let survival_ruleset = ruleset[0].chars();
         let birth_ruleset = ruleset[1].chars();
         for c in survival_ruleset {
-            srvl.push(c.to_digit(10).unwrap() as u8);
+            srvl.push(c.to_digit(10).unwrap() as u32);
         }
         for c in birth_ruleset {
-            brth.push(c.to_digit(10).unwrap() as u8);
+            brth.push(c.to_digit(10).unwrap() as u32);
         }
     }
     // Sort and remove duplicated rules
@@ -385,8 +385,8 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
     }
 
     // Get ruleset
-    let mut srvl: Vec<u8> = Vec::new();
-    let mut brth: Vec<u8> = Vec::new();
+    let mut srvl: Vec<u32> = Vec::new();
+    let mut brth: Vec<u32> = Vec::new();
     if *lines.front().unwrap() == "#N" {
         lines.pop_front().unwrap();
         srvl = vec![2, 3];
@@ -402,10 +402,10 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
         let survival_ruleset = ruleset[0].chars();
         let birth_ruleset = ruleset[1].chars();
         for c in survival_ruleset {
-            srvl.push(c.to_digit(10).unwrap() as u8);
+            srvl.push(c.to_digit(10).unwrap() as u32);
         }
         for c in birth_ruleset {
-            brth.push(c.to_digit(10).unwrap() as u8);
+            brth.push(c.to_digit(10).unwrap() as u32);
         }
     }
     // Sort and remove duplicated rules

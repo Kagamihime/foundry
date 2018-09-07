@@ -62,7 +62,7 @@ impl Grid {
         let (rows, cols) = grid.get_grid_size();
         for row in 0..rows {
             for col in 0..cols {
-                let mut living_cells_around: u8 = 0;
+                let mut living_cells_around: u32 = 0;
                 for offset in NEIGHBORHOOD_OFFSETS.iter() {
                     if self.get_cell_state(row as i64 + offset.0, col as i64 + offset.1) == 255 {
                         living_cells_around += 1;
@@ -107,7 +107,7 @@ impl Grid {
 
         for row in 0..old_grid_size.0 {
             for col in 0..old_grid_size.1 {
-                let mut living_cells_around: u8 = 0;
+                let mut living_cells_around: u32 = 0;
                 for offset in NEIGHBORHOOD_OFFSETS.iter() {
                     if self.get_cell_state(row as i64 + offset.0, col as i64 + offset.1) == 255 {
                         living_cells_around += 1;

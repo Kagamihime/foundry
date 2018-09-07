@@ -41,8 +41,8 @@ pub struct Grid {
     format: String, // Contains the file format used
     toroidal: Arc<CpuAccessibleBuffer<i32>>, // Resizable grid if set to false (note: false = 0 and true = 1)
 
-    survival: Arc<CpuAccessibleBuffer<[u8]>>,
-    birth: Arc<CpuAccessibleBuffer<[u8]>>,
+    survival: Arc<CpuAccessibleBuffer<[u32]>>,
+    birth: Arc<CpuAccessibleBuffer<[u32]>>,
 
     grid_size: (usize, usize),
     cells: Arc<CpuAccessibleBuffer<[u8]>>,
@@ -63,8 +63,8 @@ impl Grid {
     pub fn new(
         frmt: &String,
         trdl: bool,
-        srvl: &Vec<u8>,
-        brth: &Vec<u8>,
+        srvl: &Vec<u32>,
+        brth: &Vec<u32>,
         rows: usize,
         cols: usize,
         pttrn_rgn: Option<(usize, usize)>,
@@ -113,8 +113,8 @@ impl Grid {
     pub fn new_random(
         frmt: &String,
         trdl: bool,
-        srvl: &Vec<u8>,
-        brth: &Vec<u8>,
+        srvl: &Vec<u32>,
+        brth: &Vec<u32>,
         rows: usize,
         cols: usize,
     ) -> Grid {
@@ -144,12 +144,12 @@ impl Grid {
     }
 
     /// Returns the survival conditions of the cellular automaton.
-    pub fn get_survival(&self) -> Vec<u8> {
+    pub fn get_survival(&self) -> Vec<u32> {
         self.survival.read().unwrap().to_vec()
     }
 
     /// Redefines the survival conditions of the cellular automaton.
-    pub fn set_survival(&mut self, srvl: &Vec<u8>) {
+    pub fn set_survival(&mut self, srvl: &Vec<u32>) {
         self.survival = CpuAccessibleBuffer::from_iter(
             self.device.clone(),
             BufferUsage::all(),
@@ -158,12 +158,12 @@ impl Grid {
     }
 
     /// Returns the birth conditions of the cellular automaton.
-    pub fn get_birth(&self) -> Vec<u8> {
+    pub fn get_birth(&self) -> Vec<u32> {
         self.birth.read().unwrap().to_vec()
     }
 
     /// Redefines the birth conditions of the cellular automaton.
-    pub fn set_birth(&mut self, brth: &Vec<u8>) {
+    pub fn set_birth(&mut self, brth: &Vec<u32>) {
         self.birth = CpuAccessibleBuffer::from_iter(
             self.device.clone(),
             BufferUsage::all(),
@@ -311,14 +311,14 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
             .expect("failed to create buffer");
 
-        let srvl_content: Vec<u8> = vec![2, 3];
+        let srvl_content: Vec<u32> = vec![2, 3];
         let survival = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
-        let brth_content: Vec<u8> = vec![3];
+        let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
@@ -377,14 +377,14 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
             .expect("failed to create buffer");
 
-        let srvl_content: Vec<u8> = vec![2, 3];
+        let srvl_content: Vec<u32> = vec![2, 3];
         let survival = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
-        let brth_content: Vec<u8> = vec![3];
+        let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
@@ -440,14 +440,14 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
             .expect("failed to create buffer");
 
-        let srvl_content: Vec<u8> = vec![2, 3];
+        let srvl_content: Vec<u32> = vec![2, 3];
         let survival = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
-        let brth_content: Vec<u8> = vec![3];
+        let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
@@ -506,14 +506,14 @@ mod tests {
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
             .expect("failed to create buffer");
 
-        let srvl_content: Vec<u8> = vec![2, 3];
+        let srvl_content: Vec<u32> = vec![2, 3];
         let survival = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
         ).expect("failed to create buffer");
 
-        let brth_content: Vec<u8> = vec![3];
+        let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
