@@ -22,17 +22,6 @@ use super::vulkano::sync::GpuFuture;
 use super::vulkan::ngs;
 use Grid;
 
-const NEIGHBORHOOD_OFFSETS: [(i64, i64); 8] = [
-    (-1, -1), // NW
-    (-1, 0),  // N
-    (-1, 1),  // NE
-    (0, -1),  // W
-    (0, 1),   // E
-    (1, -1),  // SW
-    (1, 0),   // S
-    (1, 1),   // SE
-];
-
 impl Grid {
     /// Randomizes the current `Grid` by setting a random state to
     /// each cell.
