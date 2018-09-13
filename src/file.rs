@@ -184,7 +184,8 @@ fn valid_resizable_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorK
             .front()
             .ok_or(FileParsingErrorKind::IncompleteFile)?
             .split_whitespace()
-            .count() != 2
+            .count()
+            != 2
         {
             return Err(FileParsingErrorKind::CoordParsingError);
         }
@@ -279,7 +280,8 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
             .front()
             .ok_or(FileParsingErrorKind::IncompleteFile)?
             .split_whitespace()
-            .count() != 2
+            .count()
+            != 2
         {
             return Err(FileParsingErrorKind::CoordParsingError);
         }

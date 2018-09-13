@@ -133,8 +133,7 @@ impl Grid {
                     compute_pipeline.clone(),
                     set.clone(),
                     (),
-                )
-                .unwrap()
+                ).unwrap()
                 .build()
                 .unwrap();
 
