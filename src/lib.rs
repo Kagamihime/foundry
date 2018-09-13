@@ -38,7 +38,7 @@ use error::GridErrorKind;
 /// These are the survival and birth conditions into `survival` and `birth`
 /// respectivly.
 pub struct Grid {
-    format: String, // Contains the file format used
+    format: String,                          // Contains the file format used
     toroidal: Arc<CpuAccessibleBuffer<i32>>, // Resizable grid if set to false (note: false = 0 and true = 1)
 
     survival: Arc<CpuAccessibleBuffer<[u32]>>,
@@ -185,7 +185,9 @@ impl Grid {
         }
 
         // If the `row` and `col` parameters are out of bound of the grid
-        if row < 0 || col < 0 || row as usize >= self.grid_size.0
+        if row < 0
+            || col < 0
+            || row as usize >= self.grid_size.0
             || col as usize >= self.grid_size.1
         {
             if self.is_toroidal() {

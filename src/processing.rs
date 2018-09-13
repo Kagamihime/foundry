@@ -103,8 +103,7 @@ impl Grid {
                     compute_pipeline.clone(),
                     set.clone(),
                     (),
-                )
-                .unwrap()
+                ).unwrap()
                 .copy_image_to_buffer(cells_out_img.clone(), self.cells.clone())
                 .unwrap()
                 .build()
@@ -169,8 +168,7 @@ impl Grid {
                 .clear_color_image(
                     centered_img.clone(),
                     ClearValue::Float([0.0, 0.0, 0.0, 0.0]),
-                )
-                .unwrap()
+                ).unwrap()
                 .build()
                 .unwrap();
 
@@ -197,8 +195,7 @@ impl Grid {
                     0,
                     [pattern_size.0 as u32, pattern_size.1 as u32, 1],
                     1,
-                )
-                .unwrap()
+                ).unwrap()
                 .copy_image_to_buffer(centered_img.clone(), centered_buff.clone())
                 .unwrap()
                 .build()
