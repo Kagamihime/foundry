@@ -1,5 +1,5 @@
-# rlife
-A life library written in Rust.
+# Foundry
+A GPU-accelerated cellular automata library using Vulkan.
 
 It is a library that aims at manipulating life cellular automata grids.
 For now it supports:
@@ -12,7 +12,7 @@ For now it supports:
 * Usage of machine learning for pattern analysis.
 
 ## About the file formats used
-For now, rlife uses two internal file formats: Resizable Life and Toroidal Life.
+For now, Foundry uses two internal file formats: Resizable Life and Toroidal Life.
 
 ### Resizable Life
 This file format is close to the Life 1.06 format:
