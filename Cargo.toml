@@ -1,6 +1,6 @@
 [package]
 name = "foundry"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Eisha Chen-yen-su <chenyensu0@gmail.com>"]
 description = "A GPU-accelerated cellular automata library using Vulkan"
 license = "LGPL-3.0-or-later"
