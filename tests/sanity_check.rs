@@ -1,6 +1,6 @@
-extern crate rlife;
+extern crate foundry;
 
-use rlife::Grid;
+use foundry::Grid;
 
 use std::fs;
 
