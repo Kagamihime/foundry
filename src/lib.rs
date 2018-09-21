@@ -44,7 +44,8 @@ pub struct Grid {
     survival: Arc<CpuAccessibleBuffer<[u32]>>,
     birth: Arc<CpuAccessibleBuffer<[u32]>>,
 
-    grid_size: (usize, usize),
+    width: usize,
+    height: usize,
     cells: Arc<CpuAccessibleBuffer<[u8]>>,
 
     device: Arc<Device>,
@@ -63,12 +64,12 @@ impl Grid {
         trdl: bool,
         srvl: &Vec<u32>,
         brth: &Vec<u32>,
-        rows: usize,
-        cols: usize,
+        width: usize,
+        height: usize,
     ) -> Grid {
         let (device, queue) = vulkan::vk_init();
 
-        let new_cells_iter = (0..rows * cols).map(|_| 0u8);
+        let new_cells_iter = (0..width * height).map(|_| 0u8);
         let new_cells =
             CpuAccessibleBuffer::from_iter(device.clone(), BufferUsage::all(), new_cells_iter)
                 .expect("failed to create buffer");
@@ -95,7 +96,8 @@ impl Grid {
             toroidal,
             survival,
             birth,
-            grid_size: (rows, cols),
+            width,
+            height,
             cells: new_cells,
             device,
             queue,
@@ -108,10 +110,10 @@ impl Grid {
         trdl: bool,
         srvl: &Vec<u32>,
         brth: &Vec<u32>,
-        rows: usize,
-        cols: usize,
+        width: usize,
+        height: usize,
     ) -> Grid {
-        let mut new_grid = Grid::new(frmt, trdl, srvl, brth, rows, cols);
+        let mut new_grid = Grid::new(frmt, trdl, srvl, brth, width, height);
         new_grid.randomize();
         new_grid
     }
@@ -164,9 +166,14 @@ impl Grid {
         ).expect("failed to create buffer");
     }
 
-    /// Returns the size of the grid.
-    pub fn get_grid_size(&self) -> (usize, usize) {
-        self.grid_size
+    /// Returns the width of the grid.
+    pub fn get_width(&self) -> usize {
+        self.width
+    }
+
+    /// Returns the height of the grid.
+    pub fn get_height(&self) -> usize {
+        self.height
     }
 
     /// Returns the state of the cell at the relative coordinates
@@ -177,7 +184,7 @@ impl Grid {
     /// modulo the size of the grid.
     /// Otherwise, if the coordinates are out of bounds but
     /// the grid is not toroidal, it returns `false`.
-    pub fn get_cell_state(&self, row: i64, col: i64) -> u8 {
+    pub fn get_cell_state(&self, x: i64, y: i64) -> u8 {
         let cells = self.cells.write().unwrap();
 
         if cells.is_empty() {
@@ -185,34 +192,30 @@ impl Grid {
         }
 
         // If the `row` and `col` parameters are out of bound of the grid
-        if row < 0
-            || col < 0
-            || row as usize >= self.grid_size.0
-            || col as usize >= self.grid_size.1
-        {
+        if x < 0 || y < 0 || x as usize >= self.width || y as usize >= self.height {
             if self.is_toroidal() {
-                let (row, col) = (
-                    if row < 0 {
-                        (self.grid_size.0 as i64 + row) as usize
-                    } else if row as usize >= self.grid_size.0 {
-                        row as usize % self.grid_size.0
+                let (x, y) = (
+                    if x < 0 {
+                        (self.width as i64 + x) as usize
+                    } else if x as usize >= self.width {
+                        x as usize % self.width
                     } else {
-                        row as usize
+                        x as usize
                     },
-                    if col < 0 {
-                        (self.grid_size.1 as i64 + col) as usize
-                    } else if col as usize >= self.grid_size.1 {
-                        col as usize % self.grid_size.1
+                    if y < 0 {
+                        (self.height as i64 + y) as usize
+                    } else if y as usize >= self.height {
+                        y as usize % self.height
                     } else {
-                        col as usize
+                        y as usize
                     },
                 );
-                cells[row * self.grid_size.1 + col]
+                cells[y * self.width + x]
             } else {
                 0
             }
         } else {
-            cells[row as usize * self.grid_size.1 + col as usize]
+            cells[y as usize * self.width + x as usize]
         }
     }
 
@@ -220,18 +223,13 @@ impl Grid {
     /// with `state`.
     /// Returns `Err(GridErrorKind::OutOfBoundCoords)` if the
     /// coordinates are out of bounds.
-    pub fn set_cell_state(
-        &mut self,
-        row: usize,
-        col: usize,
-        state: u8,
-    ) -> Result<(), GridErrorKind> {
+    pub fn set_cell_state(&mut self, x: usize, y: usize, state: u8) -> Result<(), GridErrorKind> {
         let mut cells = self.cells.write().unwrap();
 
-        if row >= self.grid_size.0 || col >= self.grid_size.1 {
+        if x >= self.width || y >= self.height {
             Err(GridErrorKind::OutOfBoundCoords)
         } else {
-            cells[row * self.grid_size.1 + col] = state;
+            cells[y * self.width + x] = state;
             Ok(())
         }
     }
@@ -244,21 +242,22 @@ impl fmt::Debug for Grid {
             ref toroidal,
             ref survival,
             ref birth,
-            ref grid_size,
+            ref width,
+            ref height,
             ..
         } = *self;
 
-        write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nGrid size:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *grid_size, self)
+        write!(f, "Format:\n{:?}\nToroidal:\n{:?}\nSurvival:\n{:?}\nBirth:\n{:?}\nWidth:\n{:?}\nHeight:\n{:?}\nCells:\n{}", *format, *toroidal,  *survival, *birth, *width, height, self)
     }
 }
 
 impl fmt::Display for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let Grid { ref grid_size, .. } = *self;
+        let Grid { width, height, .. } = *self;
 
-        for row in 0..grid_size.0 {
-            for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) == 255 {
+        for y in 0..height {
+            for x in 0..width {
+                if self.get_cell_state(x as i64, y as i64) == 255 {
                     write!(f, "*")?;
                 } else {
                     write!(f, ".")?;
