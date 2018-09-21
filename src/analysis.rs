@@ -21,58 +21,58 @@ impl Grid {
     /// Returns the coordinates of the cell at the upper left corner of
     /// the current `Grid`.
     pub fn guess_pattern_origin(&self) -> (usize, usize) {
-        let grid_size = self.get_grid_size();
+        let width = self.width;
+        let height = self.height;
 
-        if grid_size == (0, 0) {
+        if width == 0 || height == 0 {
             return (0, 0);
         }
 
-        let mut pattern_origin = grid_size;
+        let mut orig_x = width;
+        let mut orig_y = height;
 
-        for row in 0..grid_size.0 {
-            for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) == 255 {
-                    if row < pattern_origin.0 {
-                        pattern_origin.0 = row;
+        for y in 0..height {
+            for x in 0..width {
+                if self.get_cell_state(x as i64, y as i64) == 255 {
+                    if x < orig_x {
+                        orig_x = x;
                     }
-                    if col < pattern_origin.1 {
-                        pattern_origin.1 = col;
+                    if y < orig_y {
+                        orig_y = y;
                     }
                 }
             }
         }
 
-        pattern_origin
+        (orig_x, orig_y)
     }
 
     /// Returns the size of the current `Grid`'s pattern.
     pub fn guess_pattern_size(&self) -> (usize, usize) {
-        let grid_size = self.get_grid_size();
+        let width = self.width;
+        let height = self.height;
 
-        if grid_size == (0, 0) {
+        if width == 0 || height == 0 {
             return (0, 0);
         }
 
-        let pattern_origin = self.guess_pattern_origin();
-        let mut pattern_limit = pattern_origin;
+        let (orig_x, orig_y) = self.guess_pattern_origin();
+        let (mut lim_x, mut lim_y) = (orig_x, orig_y);
 
-        for row in 0..grid_size.0 {
-            for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) == 255 {
-                    if row > pattern_limit.0 {
-                        pattern_limit.0 = row;
+        for y in 0..height {
+            for x in 0..width {
+                if self.get_cell_state(x as i64, y as i64) == 255 {
+                    if x > lim_x {
+                        lim_x = x;
                     }
-                    if col > pattern_limit.1 {
-                        pattern_limit.1 = col;
+                    if y > lim_y {
+                        lim_y = y;
                     }
                 }
             }
         }
 
-        (
-            pattern_limit.0 - pattern_origin.0 + 1,
-            pattern_limit.1 - pattern_origin.1 + 1,
-        )
+        (lim_x - orig_x + 1, lim_y - orig_y + 1)
     }
 
     pub fn compute_pattern_boundaries(
@@ -81,8 +81,8 @@ impl Grid {
         let cells_img = StorageImage::new(
             self.device.clone(),
             Dimensions::Dim2d {
-                width: self.grid_size.1 as u32,
-                height: self.grid_size.0 as u32,
+                width: self.width as u32,
+                height: self.height as u32,
             },
             Format::R8Unorm,
             Some(self.queue.family()),
@@ -91,13 +91,13 @@ impl Grid {
         let flat_map_x = CpuAccessibleBuffer::from_iter(
             self.device.clone(),
             BufferUsage::all(),
-            (0..self.grid_size.1).map(|_| 0),
+            (0..self.width).map(|_| 0),
         ).expect("failed to create buffer");
 
         let flat_map_y = CpuAccessibleBuffer::from_iter(
             self.device.clone(),
             BufferUsage::all(),
-            (0..self.grid_size.0).map(|_| 0),
+            (0..self.height).map(|_| 0),
         ).expect("failed to create buffer");
 
         let shader =
@@ -126,8 +126,8 @@ impl Grid {
                 .unwrap()
                 .dispatch(
                     [
-                        (self.grid_size.1 as f64 / 8.0).ceil() as u32,
-                        (self.grid_size.0 as f64 / 8.0).ceil() as u32,
+                        (self.width as f64 / 8.0).ceil() as u32,
+                        (self.height as f64 / 8.0).ceil() as u32,
                         1,
                     ],
                     compute_pipeline.clone(),

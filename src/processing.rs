@@ -28,13 +28,14 @@ impl Grid {
     pub fn randomize(&mut self) {
         let mut rng = rand::thread_rng();
 
-        let (rows, cols) = self.get_grid_size();
-        for row in 0..rows {
-            for col in 0..cols {
+        let width = self.get_width();
+        let height = self.get_height();
+        for y in 0..height {
+            for x in 0..width {
                 if rng.gen::<bool>() {
-                    self.set_cell_state(row, col, 255).unwrap(); // Shouldn't fail
+                    self.set_cell_state(x, y, 255).unwrap(); // Shouldn't fail
                 } else {
-                    self.set_cell_state(row, col, 0).unwrap(); // Shouldn't fail
+                    self.set_cell_state(x, y, 0).unwrap(); // Shouldn't fail
                 }
             }
         }
@@ -49,8 +50,8 @@ impl Grid {
         let cells_in_img = StorageImage::new(
             self.device.clone(),
             Dimensions::Dim2d {
-                width: self.grid_size.1 as u32,
-                height: self.grid_size.0 as u32,
+                width: self.width as u32,
+                height: self.height as u32,
             },
             Format::R8Unorm,
             Some(self.queue.family()),
@@ -59,8 +60,8 @@ impl Grid {
         let cells_out_img = StorageImage::new(
             self.device.clone(),
             Dimensions::Dim2d {
-                width: self.grid_size.1 as u32,
-                height: self.grid_size.0 as u32,
+                width: self.width as u32,
+                height: self.height as u32,
             },
             Format::R8Unorm,
             Some(self.queue.family()),
@@ -96,8 +97,8 @@ impl Grid {
                 .unwrap()
                 .dispatch(
                     [
-                        (self.grid_size.1 as f64 / 8.0).ceil() as u32,
-                        (self.grid_size.0 as f64 / 8.0).ceil() as u32,
+                        (self.width as f64 / 8.0).ceil() as u32,
+                        (self.height as f64 / 8.0).ceil() as u32,
                         1,
                     ],
                     compute_pipeline.clone(),
@@ -137,8 +138,8 @@ impl Grid {
         let cells_img = StorageImage::new(
             self.device.clone(),
             Dimensions::Dim2d {
-                width: self.grid_size.1 as u32,
-                height: self.grid_size.0 as u32,
+                width: self.width as u32,
+                height: self.height as u32,
             },
             Format::R8Unorm,
             Some(self.queue.family()),
@@ -208,7 +209,8 @@ impl Grid {
             .wait(None)
             .unwrap();
 
-        self.grid_size = (pattern_size.1 + 2, pattern_size.0 + 2);
+        self.width = pattern_size.0 + 2;
+        self.height = pattern_size.1 + 2;
         self.cells = centered_buff;
     }
 }

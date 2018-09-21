@@ -74,16 +74,17 @@ impl Grid {
         lines.push_back(format!("#R {}/{}", survival_ruleset, birth_ruleset));
 
         // Put grid size if toroidal
-        let grid_size = self.get_grid_size();
+        let width = self.get_width();
+        let height = self.get_height();
         if self.is_toroidal() {
-            lines.push_back(format!("#S {} {}", grid_size.0, grid_size.1));
+            lines.push_back(format!("#S {} {}", width, height));
         }
 
         // Put living cells coords
-        for row in 0..grid_size.0 {
-            for col in 0..grid_size.1 {
-                if self.get_cell_state(row as i64, col as i64) == 255 {
-                    lines.push_back(format!("{} {}", row, col));
+        for y in 0..height {
+            for x in 0..width {
+                if self.get_cell_state(x as i64, y as i64) == 255 {
+                    lines.push_back(format!("{} {}", x, y));
                 }
             }
         }
@@ -255,7 +256,7 @@ fn valid_toroidal_life(lines: LinkedList<&str>) -> Result<(), FileParsingErrorKi
             .ok_or(FileParsingErrorKind::IncompleteFile)?;
     }
 
-    // Check grid size specification (#S <rows> <cols>)
+    // Check grid size specification (#S <width> <height>)
     let grid_size_line = lines
         .pop_front()
         .ok_or(FileParsingErrorKind::IncompleteFile)?;
@@ -349,30 +350,21 @@ fn load_resizable_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingError
         );
         file_coords.push(coords);
     }
-    let pattern_size = guess_pattern_size(&file_coords);
-
-    let grid_size = (pattern_size.0 + 2, pattern_size.1 + 2); // "+ 2" so that there is a border with the width of one cell around the pattern
+    let (width, height) = guess_pattern_size(&file_coords);
 
     // Make CA grid
-    let mut grid = Grid::new(
-        &frmt.to_string(),
-        false,
-        &srvl,
-        &brth,
-        grid_size.0,
-        grid_size.1,
-    );
+    let mut grid = Grid::new(&frmt.to_string(), false, &srvl, &brth, width, height);
 
     // Set to true the cells that are alive
-    for (row, col) in file_coords {
-        grid.set_cell_state(row, col, 255)?;
+    for (x, y) in file_coords {
+        grid.set_cell_state(x, y, 255)?;
     }
 
     // Return CA grid
     Ok(grid)
 }
 
-// Works like Life 1.06 except there is a #S <rows> <cols> before the cells "coords"
+// Works like Life 1.06 except there is a #S <width> <height> before the cells "coords"
 fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorKind> {
     let mut lines = lines; // Make lines mutable
 
@@ -421,20 +413,13 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
         .split_whitespace()
         .filter(|s| *s != "#S")
         .collect();
-    let grid_size: (usize, usize) = (
+    let (width, height): (usize, usize) = (
         grid_size_line_terms[0].parse().unwrap(),
         grid_size_line_terms[1].parse().unwrap(),
     );
 
     // Make CA grid
-    let mut grid = Grid::new(
-        &frmt.to_string(),
-        true,
-        &srvl,
-        &brth,
-        grid_size.0,
-        grid_size.1,
-    );
+    let mut grid = Grid::new(&frmt.to_string(), true, &srvl, &brth, width, height);
 
     // Get the coordinates from the file
     let mut file_coords: Vec<(usize, usize)> = Vec::new();
@@ -448,8 +433,8 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
     }
 
     // Set to true the cells that are alive
-    for (row, col) in file_coords {
-        grid.set_cell_state(row, col, 255)?;
+    for (x, y) in file_coords {
+        grid.set_cell_state(x, y, 255)?;
     }
 
     // Return CA grid
@@ -457,16 +442,16 @@ fn load_toroidal_life(lines: LinkedList<&str>) -> Result<Grid, FileParsingErrorK
 }
 
 fn guess_pattern_size(coords: &[(usize, usize)]) -> (usize, usize) {
-    let mut max_coords: (usize, usize) = (0, 0);
+    let (mut lim_x, mut lim_y): (usize, usize) = (0, 0);
 
-    for &(row, col) in coords {
-        if row > max_coords.0 {
-            max_coords.0 = row;
+    for &(x, y) in coords {
+        if x > lim_x {
+            lim_x = x;
         }
-        if col > max_coords.1 {
-            max_coords.1 = col;
+        if y > lim_y {
+            lim_y = y;
         }
     }
     // The "+ 1"s are here because because the "coords" start at 0
-    (max_coords.0 + 1, max_coords.1 + 1)
+    (lim_x + 1, lim_y + 1)
 }
