@@ -57,8 +57,7 @@ impl Grid {
     /// * containing the file format `frmt`
     /// * toroidal if `trdl` is `true`, resizable otherwise
     /// * containing the rules given by `srvl` and `brth`
-    /// * whose grid's size is the same as `rows` and `cols`
-    /// * `pttrn_rgn` can represent the relative position  of the pattern within the grid
+    /// * whose grid's size is determined by `width` and `height`
     pub fn new(
         frmt: &String,
         trdl: bool,
@@ -176,14 +175,13 @@ impl Grid {
         self.height
     }
 
-    /// Returns the state of the cell at the relative coordinates
-    /// (`row`, `col`).
+    /// Returns the state of the cell at the coordinates (`x`, `y`).
     ///
     /// If the coordinates are out of bounds and the grid is toroidal,
     /// then it returns the state of the cell at the coordinates
     /// modulo the size of the grid.
     /// Otherwise, if the coordinates are out of bounds but
-    /// the grid is not toroidal, it returns `false`.
+    /// the grid is not toroidal, it returns `0u8`.
     pub fn get_cell_state(&self, x: i64, y: i64) -> u8 {
         let cells = self.cells.write().unwrap();
 
@@ -191,7 +189,7 @@ impl Grid {
             return 0;
         }
 
-        // If the `row` and `col` parameters are out of bound of the grid
+        // If the `x` and `y` parameters are out of bound of the grid
         if x < 0 || y < 0 || x as usize >= self.width || y as usize >= self.height {
             if self.is_toroidal() {
                 let (x, y) = (
@@ -219,7 +217,7 @@ impl Grid {
         }
     }
 
-    /// Modifies the state of the cell at the coordinates (`row`, `col`)
+    /// Modifies the state of the cell at the coordinates (`x`, `y`)
     /// with `state`.
     /// Returns `Err(GridErrorKind::OutOfBoundCoords)` if the
     /// coordinates are out of bounds.
