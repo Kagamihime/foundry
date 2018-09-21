@@ -13,7 +13,8 @@ fn test_toroidal_load_file() {
     assert_eq!(true, grid.is_toroidal());
     assert_eq!(vec![2, 3], grid.get_survival());
     assert_eq!(vec![3], grid.get_birth());
-    assert_eq!((5, 5), grid.get_grid_size());
+    assert_eq!(5, grid.get_width());
+    assert_eq!(5, grid.get_height());
 
     assert_eq!(0, grid.get_cell_state(0, 0));
     assert_eq!(0, grid.get_cell_state(0, 1));
@@ -53,7 +54,8 @@ fn test_toroidal_next_gen() {
     assert_eq!(true, grid.is_toroidal());
     assert_eq!(vec![2, 3], grid.get_survival());
     assert_eq!(vec![3], grid.get_birth());
-    assert_eq!((5, 5), grid.get_grid_size());
+    assert_eq!(5, grid.get_width());
+    assert_eq!(5, grid.get_height());
 
     assert_eq!(0, grid.get_cell_state(0, 0));
     assert_eq!(0, grid.get_cell_state(0, 1));
@@ -109,23 +111,12 @@ fn test_resizable_load_file() {
     assert_eq!(false, grid.is_toroidal());
     assert_eq!(vec![2, 3], grid.get_survival());
     assert_eq!(vec![3], grid.get_birth());
-    assert_eq!((3, 5), grid.get_grid_size());
+    assert_eq!(1, grid.get_width());
+    assert_eq!(3, grid.get_height());
 
     assert_eq!(255, grid.get_cell_state(0, 0));
     assert_eq!(255, grid.get_cell_state(0, 1));
     assert_eq!(255, grid.get_cell_state(0, 2));
-    assert_eq!(0, grid.get_cell_state(0, 3));
-    assert_eq!(0, grid.get_cell_state(0, 4));
-    assert_eq!(0, grid.get_cell_state(1, 0));
-    assert_eq!(0, grid.get_cell_state(1, 1));
-    assert_eq!(0, grid.get_cell_state(1, 2));
-    assert_eq!(0, grid.get_cell_state(1, 3));
-    assert_eq!(0, grid.get_cell_state(1, 4));
-    assert_eq!(0, grid.get_cell_state(2, 0));
-    assert_eq!(0, grid.get_cell_state(2, 1));
-    assert_eq!(0, grid.get_cell_state(2, 2));
-    assert_eq!(0, grid.get_cell_state(2, 3));
-    assert_eq!(0, grid.get_cell_state(2, 4));
 }
 
 #[test]
@@ -139,7 +130,8 @@ fn test_resizable_next_gen() {
     assert_eq!(false, grid.is_toroidal());
     assert_eq!(vec![2, 3], grid.get_survival());
     assert_eq!(vec![3], grid.get_birth());
-    assert_eq!((3, 5), grid.get_grid_size());
+    assert_eq!(3, grid.get_width());
+    assert_eq!(5, grid.get_height());
 
     assert_eq!(0, grid.get_cell_state(0, 0));
     assert_eq!(0, grid.get_cell_state(0, 1));
