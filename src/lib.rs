@@ -233,6 +233,34 @@ impl Grid {
     }
 }
 
+impl Clone for Grid {
+    fn clone(&self) -> Grid {
+        let new_format = self.get_format();
+        let new_toroidal = self.is_toroidal();
+        let new_survival = self.get_survival();
+        let new_birth = self.get_birth();
+        let new_width = self.get_width();
+        let new_height = self.get_height();
+
+        let mut new_grid = Grid::new(
+            &new_format,
+            new_toroidal,
+            &new_survival,
+            &new_birth,
+            new_width,
+            new_height,
+        );
+
+        new_grid.cells = CpuAccessibleBuffer::from_iter(
+            new_grid.device.clone(),
+            BufferUsage::all(),
+            self.cells.read().unwrap().to_vec().into_iter(),
+        ).expect("failed to create buffer");
+
+        new_grid
+    }
+}
+
 impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let Grid {
