@@ -55,8 +55,14 @@ impl Grid {
     pub fn save_life_grid(&self, path: &str) -> Result<(), io::Error> {
         let mut lines: LinkedList<String> = LinkedList::new();
 
+        // Recenter the `Grid`
+        let mut grid = self.clone();
+        if !self.is_toroidal() {
+            grid.recenter_pattern(0);
+        }
+
         // Put format
-        if self.is_toroidal() {
+        if grid.is_toroidal() {
             lines.push_back("#Toroidal Life".to_string());
         } else {
             lines.push_back("#Resizable Life".to_string());
@@ -65,25 +71,25 @@ impl Grid {
         // Put ruleset
         let mut survival_ruleset = String::new();
         let mut birth_ruleset = String::new();
-        for n in self.survival.read().unwrap().iter() {
+        for n in grid.survival.read().unwrap().iter() {
             survival_ruleset.push_str(&n.to_string());
         }
-        for n in self.birth.read().unwrap().iter() {
+        for n in grid.birth.read().unwrap().iter() {
             birth_ruleset.push_str(&n.to_string());
         }
         lines.push_back(format!("#R {}/{}", survival_ruleset, birth_ruleset));
 
         // Put grid size if toroidal
-        let width = self.get_width();
-        let height = self.get_height();
-        if self.is_toroidal() {
+        let width = grid.get_width();
+        let height = grid.get_height();
+        if grid.is_toroidal() {
             lines.push_back(format!("#S {} {}", width, height));
         }
 
         // Put living cells coords
         for y in 0..height {
             for x in 0..width {
-                if self.get_cell_state(x as i64, y as i64) == 255 {
+                if grid.get_cell_state(x as i64, y as i64) == 255 {
                     lines.push_back(format!("{} {}", x, y));
                 }
             }
