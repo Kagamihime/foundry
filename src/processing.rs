@@ -44,7 +44,7 @@ impl Grid {
     /// Computes the next generation of the current `Grid` and updates it.
     pub fn next_gen(&mut self) {
         if !self.is_toroidal() {
-            self.recenter_pattern();
+            self.recenter_pattern(1);
         }
 
         let cells_in_img = StorageImage::new(
@@ -118,7 +118,7 @@ impl Grid {
             .unwrap();
     }
 
-    fn recenter_pattern(&mut self) {
+    pub fn recenter_pattern(&mut self, border_width: usize) {
         let (min_x, max_x, min_y, max_y) = self.compute_pattern_boundaries();
 
         if min_x.is_none() || max_x.is_none() || min_y.is_none() || max_y.is_none() {
@@ -148,8 +148,8 @@ impl Grid {
         let centered_img = StorageImage::new(
             self.device.clone(),
             Dimensions::Dim2d {
-                width: pattern_size.0 as u32 + 2,
-                height: pattern_size.1 as u32 + 2,
+                width: pattern_size.0 as u32 + 2 * border_width as u32,
+                height: pattern_size.1 as u32 + 2 * border_width as u32,
             },
             Format::R8Unorm,
             Some(self.queue.family()),
@@ -158,7 +158,7 @@ impl Grid {
         let centered_buff = unsafe {
             CpuAccessibleBuffer::uninitialized_array(
                 self.device.clone(),
-                (pattern_size.0 + 2) * (pattern_size.1 + 2),
+                (pattern_size.0 + 2 * border_width) * (pattern_size.1 + 2 * border_width),
                 BufferUsage::all(),
             ).expect("failed to create buffer")
         };
@@ -191,7 +191,7 @@ impl Grid {
                     0,
                     0,
                     centered_img.clone(),
-                    [1, 1, 0],
+                    [border_width as i32, border_width as i32, 0],
                     0,
                     0,
                     [pattern_size.0 as u32, pattern_size.1 as u32, 1],
@@ -209,8 +209,8 @@ impl Grid {
             .wait(None)
             .unwrap();
 
-        self.width = pattern_size.0 + 2;
-        self.height = pattern_size.1 + 2;
+        self.width = pattern_size.0 + 2 * border_width;
+        self.height = pattern_size.1 + 2 * border_width;
         self.cells = centered_buff;
     }
 }
