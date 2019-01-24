@@ -11,6 +11,7 @@ pub mod analysis;
 pub mod error;
 pub mod file;
 pub mod processing;
+pub mod view;
 mod vulkan;
 
 use std::fmt;
