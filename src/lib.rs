@@ -82,13 +82,15 @@ impl Grid {
             device.clone(),
             BufferUsage::all(),
             srvl.iter().map(|&n| n),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             brth.iter().map(|&n| n),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         Grid {
             format: frmt.clone(),
@@ -148,7 +150,8 @@ impl Grid {
             self.device.clone(),
             BufferUsage::all(),
             srvl.iter().map(|&n| n),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
     }
 
     /// Returns the birth conditions of the cellular automaton.
@@ -162,7 +165,8 @@ impl Grid {
             self.device.clone(),
             BufferUsage::all(),
             brth.iter().map(|&n| n),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
     }
 
     /// Returns the width of the grid.
@@ -255,7 +259,8 @@ impl Clone for Grid {
             new_grid.device.clone(),
             BufferUsage::all(),
             self.cells.read().unwrap().to_vec().into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         new_grid
     }
@@ -314,7 +319,8 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             cells_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
             .expect("failed to create buffer");
@@ -324,14 +330,16 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             brth_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let control_grid = Grid {
             format: String::from("#Toroidal Life"),
@@ -380,7 +388,8 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             cells_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 1)
             .expect("failed to create buffer");
@@ -390,14 +399,16 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             brth_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let mut control_grid = Grid {
             format: String::from("#Toroidal Life"),
@@ -443,7 +454,8 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             cells_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
             .expect("failed to create buffer");
@@ -453,14 +465,16 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             brth_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let control_grid = Grid {
             format: String::from("#Resizable Life"),
@@ -509,7 +523,8 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             cells_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let toroidal = CpuAccessibleBuffer::from_data(device.clone(), BufferUsage::all(), 0)
             .expect("failed to create buffer");
@@ -519,14 +534,16 @@ mod tests {
             device.clone(),
             BufferUsage::all(),
             srvl_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let brth_content: Vec<u32> = vec![3];
         let birth = CpuAccessibleBuffer::from_iter(
             device.clone(),
             BufferUsage::all(),
             brth_content.into_iter(),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let mut control_grid = Grid {
             format: String::from("#Resizable Life"),
