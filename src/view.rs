@@ -56,7 +56,34 @@ impl<'a> View<'a> {
         self.height = h;
     }
 
-    pub fn render(&self, img_height: usize, img_width: usize) -> Vec<u8> {
-        unimplemented!();
+    pub fn render(&self, img_width: usize, img_height: usize) -> Vec<u8> {
+        let view_width = if self.x_pos + self.width > self.grid.get_width() {
+            let offset = self.x_pos + self.width - self.grid.get_width();
+
+            self.width - offset
+        } else {
+            self.width
+        };
+
+        let view_height = if self.y_pos + self.height > self.grid.get_height() {
+            let offset = self.y_pos + self.height - self.grid.get_height();
+
+            self.height - offset
+        } else {
+            self.height
+        };
+
+        self.grid.render(
+            self.x_pos,
+            self.y_pos,
+            view_width,
+            view_height,
+            img_width,
+            img_height,
+        )
     }
+}
+
+impl Grid {
+    // There will be the default view builders
 }
