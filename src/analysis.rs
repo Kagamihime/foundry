@@ -86,19 +86,22 @@ impl Grid {
             },
             Format::R8Unorm,
             Some(self.queue.family()),
-        ).expect("failed to create image");
+        )
+        .expect("failed to create image");
 
         let flat_map_x = CpuAccessibleBuffer::from_iter(
             self.device.clone(),
             BufferUsage::all(),
             (0..self.width).map(|_| 0),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let flat_map_y = CpuAccessibleBuffer::from_iter(
             self.device.clone(),
             BufferUsage::all(),
             (0..self.height).map(|_| 0),
-        ).expect("failed to create buffer");
+        )
+        .expect("failed to create buffer");
 
         let shader =
             fms::Shader::load(self.device.clone()).expect("failed to create shader module");
@@ -133,7 +136,8 @@ impl Grid {
                     compute_pipeline.clone(),
                     set.clone(),
                     (),
-                ).unwrap()
+                )
+                .unwrap()
                 .build()
                 .unwrap();
 
