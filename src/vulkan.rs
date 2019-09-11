@@ -32,7 +32,8 @@ pub fn vk_init() -> (Arc<Device>, Arc<Queue>) {
         &img_extended_formats_feature,
         &DeviceExtensions::none(),
         [(queue_family, 0.5)].iter().cloned(),
-    ).expect("failed to create device");
+    )
+    .expect("failed to create device");
 
     let queue = queues.next().unwrap();
 
