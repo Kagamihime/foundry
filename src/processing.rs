@@ -55,7 +55,8 @@ impl Grid {
             },
             Format::R8Unorm,
             Some(self.queue.family()),
-        ).expect("failed to create image");
+        )
+        .expect("failed to create image");
 
         let cells_out_img = StorageImage::new(
             self.device.clone(),
@@ -65,7 +66,8 @@ impl Grid {
             },
             Format::R8Unorm,
             Some(self.queue.family()),
-        ).expect("failed to create image");
+        )
+        .expect("failed to create image");
 
         let shader =
             ngs::Shader::load(self.device.clone()).expect("failed to create shader module");
@@ -104,7 +106,8 @@ impl Grid {
                     compute_pipeline.clone(),
                     set.clone(),
                     (),
-                ).unwrap()
+                )
+                .unwrap()
                 .copy_image_to_buffer(cells_out_img.clone(), self.cells.clone())
                 .unwrap()
                 .build()
@@ -143,7 +146,8 @@ impl Grid {
             },
             Format::R8Unorm,
             Some(self.queue.family()),
-        ).expect("failed to create image");
+        )
+        .expect("failed to create image");
 
         let centered_img = StorageImage::new(
             self.device.clone(),
@@ -153,14 +157,16 @@ impl Grid {
             },
             Format::R8Unorm,
             Some(self.queue.family()),
-        ).expect("failed to create image");
+        )
+        .expect("failed to create image");
 
         let centered_buff = unsafe {
             CpuAccessibleBuffer::uninitialized_array(
                 self.device.clone(),
                 (pattern_size.0 + 2 * border_width) * (pattern_size.1 + 2 * border_width),
                 BufferUsage::all(),
-            ).expect("failed to create buffer")
+            )
+            .expect("failed to create buffer")
         };
 
         let command_buffer =
@@ -169,7 +175,8 @@ impl Grid {
                 .clear_color_image(
                     centered_img.clone(),
                     ClearValue::Float([0.0, 0.0, 0.0, 0.0]),
-                ).unwrap()
+                )
+                .unwrap()
                 .build()
                 .unwrap();
 
@@ -196,7 +203,8 @@ impl Grid {
                     0,
                     [pattern_size.0 as u32, pattern_size.1 as u32, 1],
                     1,
-                ).unwrap()
+                )
+                .unwrap()
                 .copy_image_to_buffer(centered_img.clone(), centered_buff.clone())
                 .unwrap()
                 .build()
